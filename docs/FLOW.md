@@ -47,13 +47,12 @@ See also: [`LIMITATIONS.md`](LIMITATIONS.md) for a full list of V1 limits (inclu
 
 ### Domain vocabulary source
 
-Normalization’s thin KB layer is loaded from project-root **[`kb.json`](../kb.json)** via `KbVocabularyProvider` / `Pipeline.from_kb()`:
+Normalization’s thin KB layer is loaded from project-root **[`kb_k21.yml`](../kb_k21.yml)** via `KbVocabularyProvider` / `Pipeline.from_kb()`:
 
-- `kb.semantic.entities` → `ENTITY`
-- `kb.semantic.measures` → `MEASURE`
-- `kb.metrics` → `MEASURE` (e.g. `total_revenue` with synonym `revenue`)
+- `entities` → `ENTITY`
+- `measures` → `MEASURE` (e.g. `total_revenue` with synonym `revenue`)
 
-Grounding loads the **full** KB slice: entities, metrics, measures, dimensions, relationships, rules, `join_paths`, and `column_hints`.
+Grounding loads the **full** KB slice: entities, measures, dimensions, and relationships. The loader maps `kb_k21.yml` into the internal shape those stages already read.
 
 Execution-oriented overlay (optional): project-root **[`grounding_contracts.json`](../grounding_contracts.json)** — metric contracts + preferred entity join paths. Spec: [`superpowers/specs/2026-09-21-grounding-contracts-overlay-design.md`](superpowers/specs/2026-09-21-grounding-contracts-overlay-design.md).
 
@@ -401,7 +400,7 @@ Score `kb.rules` and `kb.join_paths` by keyword overlap with tables/concepts; at
 
 ## Overlay file
 
-Project-root [`grounding_contracts.json`](../grounding_contracts.json) (optional). Missing file → V1 BFS-only behavior. `kb.json` stays unchanged.
+Project-root [`grounding_contracts.json`](../grounding_contracts.json) (optional). Missing file → V1 BFS-only behavior. `kb_k21.yml` stays the knowledge source.
 
 ## Step 0 — Business Object scope (optional but recommended)
 

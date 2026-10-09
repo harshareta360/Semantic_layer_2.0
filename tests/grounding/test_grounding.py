@@ -64,7 +64,8 @@ def test_ground_rank_revenue_by_grade():
     assert any(e.source_table == "public_grades_master" for e in grounded.entities)
     assert any(m.concept == "total_revenue" for m in grounded.metrics)
     metric = next(m for m in grounded.metrics if m.concept == "total_revenue")
-    assert "SUM" in metric.sql_expression.upper()
+    assert metric.aggregation_type == "sum"
+    assert "amount" in metric.sql_expression.lower()
     assert any("payment" in t for t in grounded.tables)
     assert grounded.time_filters
     assert grounded.time_filters[0].range == "THIS_YEAR"

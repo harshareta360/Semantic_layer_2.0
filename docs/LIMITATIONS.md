@@ -11,7 +11,7 @@ Last updated: 2026-09-21
 
 | Limitation | Detail |
 |------------|--------|
-| ~~No Grounding~~ | **Added:** deterministic `GroundingEngine` resolves entities/metrics/joins from `kb.json` → `GroundedContext` |
+| ~~No Grounding~~ | **Added:** deterministic `GroundingEngine` resolves entities/metrics/joins from `kb_k21.yml` → `GroundedContext` |
 | ~~No Query IR~~ | **Added:** `compile_query_ir` → pure `QueryIR` + `QueryIRResult` (+ thin Postgres `sql_preview`) |
 | ~~No SQLGlot~~ | **Added:** `render_sql` via SQLGlot (postgres); thin `to_sql_postgres` is fallback only |
 | No end-to-end execute | No database execution, retry, or repair loop |
@@ -47,8 +47,8 @@ Input:  What is total revenue? Show top 10 grades by revenue
 
 | Limitation | Detail |
 |------------|--------|
-| Fixture KB by default | Demo unit tests may use `domain_vocab.json`; **runtime default is project `kb.json`** via `Pipeline.from_kb()` / `KbVocabularyProvider` |
-| Thin slice of KB only | Normalization loads `semantic.entities`, `semantic.measures`, and `metrics` (+ synonyms). It does **not** load rules, joins, dimensions, SQL maps, or few-shots |
+| Fixture KB by default | Demo unit tests may use `domain_vocab.json`; **runtime default is project `kb_k21.yml`** via `Pipeline.from_kb()` / `KbVocabularyProvider` |
+| Thin slice of KB only | Normalization loads `entities` and `measures` (+ synonyms). It does **not** load relationships, dimensions, or conditions |
 | Fuzzy needs enough signal | Typos too far from any form (`xyzabc`) stay unresolved |
 | Near-tie rejection | Two domain candidates within `min_margin` → **no** correction (safe, but may leave typos) |
 | Thresholds are heuristic | Default `min_score=80`, `min_margin=5` are not calibrated per tenant |
@@ -128,7 +128,7 @@ Input:  What is total revenue? Show top 10 grades by revenue
 ## 9. Deliberate non-goals (do not “fix” inside Intent)
 
 - Emitting SQL strings or dialect keywords in the AST  
-- Inventing joins or metric formulas not present in `kb.json`  
+- Inventing joins or metric formulas not present in `kb_k21.yml`  
 - Guessing when fuzzy or patterns are ambiguous  
 
 ---

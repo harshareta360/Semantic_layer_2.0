@@ -13,7 +13,7 @@
 - Caller provides `bo_id`; no inference
 - Unknown `bo_id` → Grounding FAILED
 - `default_filters` remain metadata only
-- Do not rewrite kb.json
+- Do not rewrite kb_k21.yml
 
 ---
 

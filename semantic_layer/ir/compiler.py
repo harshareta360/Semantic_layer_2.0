@@ -6,6 +6,7 @@ from semantic_layer.grounding.models import (
     GroundedContext,
     GroundedEntity,
     GroundedJoin,
+    GroundedMetric,
     GroundingStatus,
 )
 from semantic_layer.intent.models.ast import QueryNode, Rank
@@ -44,6 +45,17 @@ _TABLE_ALIASES: dict[str, str] = {
 _EQ_ON = re.compile(
     r"^\s*([a-zA-Z_][\w]*)\.([a-zA-Z_][\w]*)\s*=\s*([a-zA-Z_][\w]*)\.([a-zA-Z_][\w]*)\s*$"
 )
+
+
+def _metric_sql(metric: GroundedMetric) -> str:
+    """Apply kb_k21 ``agg`` when the expression is not already wrapped."""
+    sql = (metric.sql_expression or "").strip()
+    agg = (metric.aggregation_type or "").strip().lower()
+    if agg not in {"sum", "avg", "min", "max", "count"} or not sql:
+        return sql
+    if sql.upper().startswith(f"{agg.upper()}("):
+        return sql
+    return f"{agg.upper()}({sql})"
 
 
 def _alias_for(table: str, used: set[str]) -> str:
@@ -271,7 +283,7 @@ def compile_query_ir(
             IrSelectItem(
                 kind=IrSelectKind.EXPRESSION,
                 alias=c,
-                sql=gm.sql_expression,  # from Grounding / kb.json only
+                sql=_metric_sql(gm),
             )
         )
 

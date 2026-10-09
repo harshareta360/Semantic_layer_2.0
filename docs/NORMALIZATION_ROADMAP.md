@@ -12,7 +12,7 @@ Intent remains responsible for query operations (`top` / `max` / …).
 | Item | Status |
 |------|--------|
 | RapidFuzz domain-only spelling correction | Done |
-| Real KB thin vocabulary (`KbVocabularyProvider` ← `kb.json`) | Done — entities, measures, metrics |
+| Real KB thin vocabulary (`KbVocabularyProvider` ← `kb_k21.yml`) | Done — entities and measures |
 | Intent/filler lexicon separate from domain KB | Done |
 | Preserve punctuation + clause splitting (`clauses[]`) | Done |
 

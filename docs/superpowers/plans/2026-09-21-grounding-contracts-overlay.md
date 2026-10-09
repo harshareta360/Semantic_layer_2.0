@@ -2,17 +2,17 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans (inline) or superpowers:subagent-driven-development. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add `grounding_contracts.json` overlay so Grounding resolves metric entities, preferred join paths, primary time columns, and default_filters metadata deterministically without changing `kb.json` or using an LLM.
+**Goal:** Add `grounding_contracts.json` overlay so Grounding resolves metric entities, preferred join paths, primary time columns, and default_filters metadata deterministically without changing `kb_k21.yml` or using an LLM.
 
-**Architecture:** Load optional overlay next to `kb.json`. Contracts alias Intent concepts → metric keys, expand `required_entities`, select preferred entity-chain paths (edges from `kb.semantic.relationships`), prefer `default_time_column`, and attach `default_filters` as GroundedContext metadata only. Missing overlay → existing BFS behavior.
+**Architecture:** Load optional overlay next to `kb_k21.yml`. Contracts alias Intent concepts → metric keys, expand `required_entities`, select preferred entity-chain paths (edges from `kb.semantic.relationships`), prefer `default_time_column`, and attach `default_filters` as GroundedContext metadata only. Missing overlay → existing BFS behavior.
 
 **Tech Stack:** Python 3.12, Pydantic v2, pytest, existing `GroundingEngine` / `KbIndex`.
 
 ## Global Constraints
 
 - No LLM in Grounding
-- Do not edit bulk `kb.json` for this feature
-- SQL expressions remain in `kb.json` unless `sql_expression_override` is set
+- Do not edit bulk `kb_k21.yml` for this feature
+- SQL expressions remain in `kb_k21.yml` unless `sql_expression_override` is set
 - Preferred paths are ordered **entity** chains; resolve ON/join_type from relationships
 - `default_filters` are metadata only — never execute/interpret as SQL in Grounding
 - Missing overlay file must not break existing tests (BFS fallback)
@@ -151,7 +151,7 @@ Expect GROUNDING section shows `applied_path_ids: ['cash_revenue_to_grade']` and
 
 | Spec item | Task |
 |-----------|------|
-| Overlay file, no kb.json rewrite | 1 |
+| Overlay file, no kb_k21.yml rewrite | 1 |
 | metric_contracts + preferred_join_paths schema | 1 |
 | Alias remap | 2 |
 | required/grain entities | 2 |

@@ -71,7 +71,7 @@ class Pipeline:
         *,
         enable_llm_fallback: bool = True,
     ) -> Pipeline:
-        """Default: thin vocab + grounding from project kb.json."""
+        """Default: thin vocab + grounding from project kb_k21.yml."""
         vocab = KbVocabularyProvider(path)
         return cls(
             normalization=NormalizationService(vocab, kb_path=path),
@@ -81,7 +81,7 @@ class Pipeline:
 
     @classmethod
     def from_fixtures(cls, *, enable_llm_fallback: bool = False) -> Pipeline:
-        """Fixture vocab for unit tests; grounding still uses kb.json if present."""
+        """Fixture vocab for unit tests; grounding still uses kb_k21.yml if present."""
         vocab = FixtureVocabularyProvider()
         grounding = None
         try:

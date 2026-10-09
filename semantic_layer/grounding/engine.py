@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from collections import defaultdict, deque
 from pathlib import Path
 from typing import Any
@@ -27,12 +26,13 @@ from semantic_layer.grounding.models import (
 )
 from semantic_layer.intent.models.result import IntentResult
 from semantic_layer.normalization.models import NormalizedQuestion
+from semantic_layer.vocabulary.kb_provider import load_kb_document
 
-_DEFAULT_KB_PATH = Path(__file__).resolve().parents[2] / "kb.json"
+_DEFAULT_KB_PATH = Path(__file__).resolve().parents[2] / "kb_k21.yml"
 
 
 class KbIndex:
-    """Indexed view of kb.json for deterministic grounding lookups."""
+    """Indexed view of the project KB (kb_k21.yml) for deterministic grounding lookups."""
 
     def __init__(self, kb_doc: dict[str, Any]) -> None:
         kb = kb_doc.get("kb", kb_doc)
@@ -88,8 +88,7 @@ class KbIndex:
     @classmethod
     def from_path(cls, path: Path | str | None = None) -> KbIndex:
         p = Path(path) if path else _DEFAULT_KB_PATH
-        doc = json.loads(p.read_text(encoding="utf-8"))
-        return cls(doc)
+        return cls(load_kb_document(p))
 
     def find_relationship(
         self, entity_a: str, entity_b: str
@@ -222,7 +221,7 @@ def _walk_concepts(node: Any, concepts: set[str], times: list[dict[str, Any]]) -
 
 
 class GroundingEngine:
-    """Deterministic grounding: Intent AST concepts × kb.json (+ contracts) → GroundedContext."""
+    """Deterministic grounding: Intent AST concepts × kb_k21.yml (+ contracts) → GroundedContext."""
 
     def __init__(
         self,

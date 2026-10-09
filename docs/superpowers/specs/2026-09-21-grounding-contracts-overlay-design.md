@@ -6,10 +6,10 @@ Scope: First grounding improvement slice (deterministic, **no LLM**)
 
 ## Goal
 
-Keep `kb.json` as the domain knowledge source. Add an execution-oriented overlay `grounding_contracts.json` that makes metric grounding and join selection **explicit and deterministic**.
+Keep `kb_k21.yml` as the domain knowledge source. Add an execution-oriented overlay `grounding_contracts.json` that makes metric grounding and join selection **explicit and deterministic**.
 
 ```text
-Existing kb.json  (unchanged)
+Existing kb_k21.yml  (unchanged)
         │
         └── grounding_contracts.json
                 ├── metric_contracts
@@ -25,7 +25,7 @@ Existing kb.json  (unchanged)
 - No LLM in Grounding
 - No Query IR / full SQL assembly
 - No rewrite of free-text `kb.rules` / `kb.join_paths` into typed rules (later slice)
-- No edits to the bulk of `kb.json`
+- No edits to the bulk of `kb_k21.yml`
 
 ## Concept naming
 
@@ -44,7 +44,7 @@ Display names (`Net Revenue`, etc.) are optional metadata for humans / debugging
 ## File location
 
 Project root: `grounding_contracts.json`  
-Loaded by `GroundingEngine` / `KbIndex` alongside `kb.json` (default path next to KB; overridable).
+Loaded by `GroundingEngine` / `KbIndex` alongside `kb_k21.yml` (default path next to KB; overridable).
 
 ## Schema
 
@@ -98,7 +98,7 @@ Loaded by `GroundingEngine` / `KbIndex` alongside `kb.json` (default path next t
 | `default_filters` | no | Predicate strings for later IR (stored on GroundedContext) |
 | `sql_expression_override` | no | If set, overrides `kb.metrics[].sql_expression`; if null/absent, use KB |
 
-SQL expressions stay in **`kb.json` metrics** by default (single source of truth). The overlay **enriches** grounding behavior; it does not duplicate SQL unless override is intentional.
+SQL expressions stay in **`kb_k21.yml` metrics** by default (single source of truth). The overlay **enriches** grounding behavior; it does not duplicate SQL unless override is intentional.
 
 **`preferred_join_paths[]`**
 
@@ -151,7 +151,7 @@ Concepts: Grade, total_revenue (+ TIME)
    ↓
 grounding_contracts.json  (alias → contract → preferred_path_id)
    ↓
-kb.json  (entity tables, metric SQL, relationship ON clauses)
+kb_k21.yml  (entity tables, metric SQL, relationship ON clauses)
    ↓
 GroundedContext
 ```
@@ -169,6 +169,6 @@ Update `docs/FLOW.md` Part C, `docs/LIMITATIONS.md` §8, `README.md` one-liner a
 
 ## Open points (defaults if you approve as-is)
 
-1. SQL stays in `kb.json`; overlay override optional — **yes**.
+1. SQL stays in `kb_k21.yml`; overlay override optional — **yes**.
 2. Preferred paths are **entity chains**, not table name lists — **yes** (tables come from entity `source_table`).
 3. Missing overlay = graceful V1 fallback — **yes**.

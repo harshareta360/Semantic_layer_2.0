@@ -61,7 +61,7 @@ class GroundedTimeFilter(BaseModel):
 
 
 class GroundedContext(BaseModel):
-    """Physical/semantic resolution of an Intent AST against kb.json."""
+    """Physical/semantic resolution of an Intent AST against kb_k21.yml."""
 
     status: GroundingStatus = GroundingStatus.VALID
     bo_id: str | None = None

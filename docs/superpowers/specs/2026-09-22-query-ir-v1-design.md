@@ -32,7 +32,7 @@ Later: SQLGlot
 
 1. **QueryIR is pure** — no `status` / `errors` inside IR; those live on `QueryIRResult` (same pattern as `IntentResult` → `intent_ast`).
 2. **IR does not re-decide base/joins** — Grounding exposes `base_entity` + `joins`; compiler only maps them into IR.
-3. **Metric SQL only from Grounding** — `expression = grounded_metric.sql_expression` (from `kb.json` via Grounding); compiler never hardcodes `SUM(pd.amount::numeric)`.
+3. **Metric SQL only from Grounding** — `expression = grounded_metric.sql_expression` (from `kb_k21.yml` via Grounding); compiler never hardcodes `SUM(pd.amount::numeric)`.
 4. **SQL-aware fragments are opaque / structured renderer input** — join `ON` and `default_filters` are resolved predicates from Grounding, not invented by IR. Prefer structured join endpoints when available; opaque strings allowed in V1 and clearly marked.
 5. **THIS_YEAR is a half-open range** —  
    `time_col >= date_trunc('year', CURRENT_DATE)`  

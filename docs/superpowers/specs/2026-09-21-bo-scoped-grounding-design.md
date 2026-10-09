@@ -17,7 +17,7 @@ Normalization + Intent   (unchanged; full thin vocab OK for V1)
       ↓
 BO registry → table/column allow-list
       ↓
-KbSlice(bo) ⊂ kb.json
+KbSlice(bo) ⊂ kb_k21.yml
       ↓
 contracts (preferred paths) validated against BO
       ↓
@@ -29,7 +29,7 @@ GroundedContext (+ bo_id)
 - Inferring BO from the question
 - Scoping Normalization / Intent vocab in V1 (can follow later)
 - Query IR / SQL
-- Changing `kb.json` contents
+- Changing `kb_k21.yml` contents
 
 ## Business objects (locked)
 

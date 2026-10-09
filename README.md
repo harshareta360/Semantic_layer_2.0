@@ -32,7 +32,7 @@ pip install -e ".[dev]"
 ```python
 from semantic_layer.pipeline import Pipeline
 
-# Uses kb.json + grounding_contracts.json + Groq Intent fallback when rules miss
+# Uses kb_k21.yml + grounding_contracts.json + Groq Intent fallback when rules miss
 pipeline = Pipeline.from_kb()
 full = pipeline.run_full("show top 10 grds by revnue this yr", bo_id="Finance")
 cr = full.clauses[0]
