@@ -1,0 +1,42 @@
+{
+  "distinct": false,
+  "from": [],
+  "group_by": [
+    {
+      "concept": "Curriculum",
+      "type": "DIMENSION_REF"
+    }
+  ],
+  "having": null,
+  "limit": 10,
+  "offset": null,
+  "operations": [
+    {
+      "dimension": {
+        "concept": "Curriculum",
+        "type": "DIMENSION_REF"
+      },
+      "direction": "DESC",
+      "limit": 10,
+      "metric": {
+        "concept": "Revenue",
+        "type": "METRIC_REF"
+      },
+      "type": "RANK"
+    }
+  ],
+  "order_by": [],
+  "select": [
+    {
+      "concept": "Curriculum",
+      "type": "DIMENSION_REF"
+    },
+    {
+      "concept": "Revenue",
+      "type": "METRIC_REF"
+    }
+  ],
+  "set_operation": null,
+  "type": "QUERY",
+  "where": null
+}

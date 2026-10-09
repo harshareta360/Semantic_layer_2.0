@@ -1,0 +1,42 @@
+{
+  "distinct": false,
+  "from": [],
+  "group_by": [
+    {
+      "concept": "School",
+      "type": "DIMENSION_REF"
+    }
+  ],
+  "having": null,
+  "limit": 8,
+  "offset": null,
+  "operations": [
+    {
+      "dimension": {
+        "concept": "School",
+        "type": "DIMENSION_REF"
+      },
+      "direction": "DESC",
+      "limit": 8,
+      "metric": {
+        "concept": "Enrollment",
+        "type": "METRIC_REF"
+      },
+      "type": "RANK"
+    }
+  ],
+  "order_by": [],
+  "select": [
+    {
+      "concept": "School",
+      "type": "DIMENSION_REF"
+    },
+    {
+      "concept": "Enrollment",
+      "type": "METRIC_REF"
+    }
+  ],
+  "set_operation": null,
+  "type": "QUERY",
+  "where": null
+}

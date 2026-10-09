@@ -1,0 +1,49 @@
+{
+  "distinct": false,
+  "from": [],
+  "group_by": [],
+  "having": null,
+  "limit": null,
+  "offset": null,
+  "operations": [
+    {
+      "comparison_type": "PERIOD_OVER_PERIOD",
+      "left": {
+        "metric": "Revenue",
+        "period": "THIS_YEAR",
+        "type": "METRIC_EXPRESSION"
+      },
+      "right": {
+        "metric": "Revenue",
+        "period": "LAST_YEAR",
+        "type": "METRIC_EXPRESSION"
+      },
+      "type": "COMPARE"
+    }
+  ],
+  "order_by": [],
+  "select": [
+    {
+      "comparison_type": "PERIOD_OVER_PERIOD",
+      "left": {
+        "metric": "Revenue",
+        "period": "THIS_YEAR",
+        "type": "METRIC_EXPRESSION"
+      },
+      "right": {
+        "metric": "Revenue",
+        "period": "LAST_YEAR",
+        "type": "METRIC_EXPRESSION"
+      },
+      "type": "COMPARE"
+    }
+  ],
+  "set_operation": null,
+  "type": "QUERY",
+  "where": {
+    "end": null,
+    "range": "THIS_YEAR",
+    "start": null,
+    "type": "TIME_FILTER"
+  }
+}

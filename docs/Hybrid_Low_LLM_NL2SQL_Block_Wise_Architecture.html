@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hybrid Low-LLM NL2SQL Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-0: #0b1620;
+      --bg-1: #11202c;
+      --bg-2: #173042;
+      --ink: #e8f1f6;
+      --muted: #9bb3c3;
+      --accent: #2ec4b6;
+      --accent-2: #f0a202;
+      --line: rgba(46, 196, 182, 0.28);
+      --code-bg: #081018;
+      --surface: rgba(23, 48, 66, 0.72);
+      --danger-soft: #ff6b6b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-0);
+      color: var(--ink);
+      font-family: "Outfit", sans-serif;
+    }
+
+    body {
+      background:
+        radial-gradient(1200px 700px at 10% -10%, rgba(46, 196, 182, 0.18), transparent 55%),
+        radial-gradient(900px 600px at 100% 0%, rgba(240, 162, 2, 0.10), transparent 50%),
+        linear-gradient(160deg, #0b1620 0%, #0e1c28 45%, #102433 100%);
+    }
+
+    .deck {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      padding: clamp(1.5rem, 4vh, 3rem) clamp(1.5rem, 5vw, 4.5rem) 4.5rem;
+      overflow: auto;
+      animation: fadeIn 0.28s ease;
+    }
+
+    .slide.active { display: flex; flex-direction: column; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .kicker {
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      font-weight: 700;
+      line-height: 1.1;
+      max-width: 18ch;
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      font-size: clamp(1.2rem, 2.2vw, 1.55rem);
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .subtitle, .lead, p {
+      color: var(--muted);
+      font-size: clamp(1rem, 1.5vw, 1.2rem);
+      line-height: 1.55;
+      max-width: 70ch;
+    }
+
+    .lead { margin-bottom: 1.25rem; }
+
+    .title-slide {
+      justify-content: center;
+      min-height: 100%;
+    }
+
+    .title-slide .brand {
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      background: linear-gradient(120deg, #e8f1f6 20%, #2ec4b6 70%, #f0a202);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 0.75rem;
+    }
+
+    .title-meta {
+      margin-top: 2rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    ul {
+      list-style: none;
+      display: grid;
+      gap: 0.55rem;
+      margin: 0.75rem 0 1rem;
+    }
+
+    ul li {
+      position: relative;
+      padding-left: 1.15rem;
+      color: var(--ink);
+      font-size: clamp(0.95rem, 1.35vw, 1.15rem);
+      line-height: 1.45;
+    }
+
+    ul li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 0.45rem;
+      height: 0.45rem;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1.5rem;
+      align-items: start;
+      flex: 1;
+      min-height: 0;
+    }
+
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem 1.15rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .panel h3 { color: var(--ink); }
+
+    pre, code {
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      overflow: auto;
+      color: #d7ebe6;
+      font-size: clamp(0.68rem, 1.05vw, 0.86rem);
+      line-height: 1.45;
+      white-space: pre;
+      max-height: min(62vh, 100%);
+    }
+
+    .flow-line {
+      color: var(--ink);
+      font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+      margin: 0.85rem 0;
+      padding: 0.75rem 1rem;
+      border-left: 3px solid var(--accent);
+      background: rgba(46, 196, 182, 0.08);
+      border-radius: 0 10px 10px 0;
+    }
+
+    .note {
+      margin-top: 0.85rem;
+      color: var(--accent-2);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .quote {
+      font-size: clamp(1.15rem, 2vw, 1.5rem);
+      color: var(--ink);
+      font-weight: 500;
+      margin: 0.75rem 0 1rem;
+      max-width: 40ch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.75rem;
+      font-size: clamp(0.85rem, 1.2vw, 1.05rem);
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.7rem 0.85rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--accent);
+      font-weight: 600;
+      background: rgba(46, 196, 182, 0.08);
+    }
+
+    td { color: var(--ink); }
+
+    .pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .pipe-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+    }
+
+    .pipe-card .n {
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .pipe-card strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .pipe-card span {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .arrow-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.35rem;
+      max-width: 720px;
+    }
+
+    .arrow-stack .node {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.55rem 0.9rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .arrow-stack .down {
+      text-align: center;
+      color: var(--accent);
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .takeaway {
+      margin-top: auto;
+      padding: 1.1rem 1.25rem;
+      border-radius: 14px;
+      border: 1px solid rgba(240, 162, 2, 0.35);
+      background: rgba(240, 162, 2, 0.08);
+      color: var(--ink);
+      font-size: clamp(1rem, 1.5vw, 1.2rem);
+      line-height: 1.5;
+      max-width: 70ch;
+    }
+
+    .nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 1.25rem;
+      background: rgba(8, 16, 24, 0.82);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+      z-index: 20;
+    }
+
+    .nav button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--bg-2);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .nav button:hover { border-color: var(--accent); color: var(--accent); }
+    .nav button:disabled { opacity: 0.35; cursor: default; }
+
+    .progress {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .bar {
+      width: min(320px, 40vw);
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar > i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: inherit;
+      transition: width 0.25s ease;
+    }
+
+    .hint {
+      position: fixed;
+      top: 1rem;
+      right: 1.25rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      z-index: 20;
+      opacity: 0.75;
+    }
+
+    .compact pre { max-height: 55vh; }
+    .scroll-ok { overflow: auto; }
+  </style>
+</head>
+<body>
+  <div class="hint">← → / Space · Esc overview</div>
+  <div class="deck" id="deck">
+
+    <!-- 0 -->
+    <section class="slide title-slide active">
+      <div class="kicker">NORA · Talk-to-data</div>
+      <div class="brand">Hybrid Low-LLM NL2SQL</div>
+      <p class="subtitle">Block-wise component design</p>
+      <p class="title-meta">Deterministic pipeline · KB as source of truth · LLM as fallback</p>
+    </section>
+
+    <!-- 1 -->
+    <section class="slide">
+      <div class="kicker">Section 1</div>
+      <h2>Overall Pipeline</h2>
+      <p class="lead">User question flows through six deterministic stages before execution.</p>
+      <div class="pipeline-grid">
+        <div class="pipe-card"><div class="n">Input</div><strong>USER QUESTION</strong><span>Original natural-language question</span></div>
+        <div class="pipe-card"><div class="n">1</div><strong>NORMALIZATION</strong><span>Rules + NLP + LLM fallback</span></div>
+        <div class="pipe-card"><div class="n">Out</div><strong>NORMALIZED QUESTION</strong><span>Canonical question + extracted concepts</span></div>
+        <div class="pipe-card"><div class="n">2</div><strong>INTENT ENGINE</strong><span>Intent grammar / classifier + LLM fallback</span></div>
+        <div class="pipe-card"><div class="n">Out</div><strong>INTENT AST</strong><span>Composable query operations (semantic, not SQL)</span></div>
+        <div class="pipe-card"><div class="n">3</div><strong>KB GROUNDING</strong><span>BM25 + Vector + Rules + Reranker</span></div>
+        <div class="pipe-card"><div class="n">Out</div><strong>GROUNDED CONTEXT</strong><span>Resolved business concepts, schema, relationships and rules</span></div>
+        <div class="pipe-card"><div class="n">4</div><strong>QUERY IR</strong><span>Deterministic IR construction + validation</span></div>
+        <div class="pipe-card"><div class="n">Out</div><strong>QUERY IR</strong><span>Structured representation of the query</span></div>
+        <div class="pipe-card"><div class="n">5</div><strong>SQL BUILDER</strong><span>SQLGlot AST</span></div>
+        <div class="pipe-card"><div class="n">Out</div><strong>SQL</strong><span>Deterministic SQL</span></div>
+        <div class="pipe-card"><div class="n">6</div><strong>SQL VALIDATOR</strong><span>Parser + schema + safety validation</span></div>
+        <div class="pipe-card"><div class="n">Final</div><strong>EXECUTE / RETRY</strong><span>Execute, classify failures, repair or escalate</span></div>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide">
+      <div class="kicker">Section 1 · Detail</div>
+      <h2>Pipeline as a linear flow</h2>
+      <pre class="compact">┌─────────────────────────────────────────────────────────────┐
+│ USER QUESTION                                               │
+│ Original natural-language question                          │
+└─────────────────────────────────────────────────────────────┘
+↓
+┌─────────────────────────────────────────────────────────────┐
+│ 1. NORMALIZATION                                            │
+│ Rules + NLP + LLM fallback                                  │
+└─────────────────────────────────────────────────────────────┘
+↓
+┌─────────────────────────────────────────────────────────────┐
+│ NORMALIZED QUESTION                                         │
+│ Canonical question + extracted concepts                     │
+└─────────────────────────────────────────────────────────────┘
+↓
+┌─────────────────────────────────────────────────────────────┐
+│ 2. INTENT ENGINE                                            │
+│ Intent grammar / classifier + LLM fallback                  │
+└─────────────────────────────────────────────────────────────┘
+↓
+┌─────────────────────────────────────────────────────────────┐
+│ INTENT AST                                                   │
+│ Composable query operations (semantic, not SQL)             │
+└─────────────────────────────────────────────────────────────┘
+↓
+┌─────────────────────────────────────────────────────────────┐
+│ 3. KB GROUNDING                                             │
+│ BM25 + Vector + Rules + Reranker                            │
+└─────────────────────────────────────────────────────────────┘</pre>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide">
+      <div class="kicker">Section 1 · Detail</div>
+      <h2>Pipeline as a linear flow (cont.)</h2>
+      <pre class="compact">┌─────────────────────────────────────────────────────────────┐
+│ GROUNDED CONTEXT                                            │
+│ Resolved business concepts, schema, relationships and rules │
+└─────────────────────────────────────────────────────────────┘
+↓
+┌─────────────────────────────────────────────────────────────┐
+│ 4. QUERY IR                                                 │
+│ Deterministic IR construction + validation                  │
+└─────────────────────────────────────────────────────────────┘
+↓
+┌─────────────────────────────────────────────────────────────┐
+│ QUERY IR                                                    │
+│ Structured representation of the query                      │
+└─────────────────────────────────────────────────────────────┘
+↓
+┌─────────────────────────────────────────────────────────────┐
+│ 5. SQL BUILDER                                              │
+│ SQLGlot AST                                                 │
+└─────────────────────────────────────────────────────────────┘
+↓
+┌─────────────────────────────────────────────────────────────┐
+│ SQL                                                         │
+│ Deterministic SQL                                           │
+└─────────────────────────────────────────────────────────────┘
+↓
+┌─────────────────────────────────────────────────────────────┐
+│ 6. SQL VALIDATOR                                            │
+│ Parser + schema + safety validation                         │
+└─────────────────────────────────────────────────────────────┘
+↓
+┌─────────────────────────────────────────────────────────────┐
+│ EXECUTE / RETRY                                             │
+│ Execute, classify failures, repair or escalate              │
+└─────────────────────────────────────────────────────────────┘</pre>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide">
+      <div class="kicker">Component 1</div>
+      <h2>Normalization — Final Summary</h2>
+      <p class="lead">Convert the user's raw question into a clean, canonical form while preserving all meaningful information.</p>
+      <div class="panel" style="max-width:70ch; margin-bottom:1rem">
+        <p><strong>One-line rule:</strong> Normalization = “What the user said — cleaned and canonicalized.”</p>
+      </div>
+      <p style="margin-bottom:0.4rem">Input example:</p>
+      <p class="quote" style="font-size:1.15rem">"show me top 10 grds having max revnue in this yr"</p>
+      <div class="two-col" style="margin-top:1rem">
+        <div>
+          <h3>A. Basic text</h3>
+          <ul>
+            <li>casing</li>
+            <li>whitespace</li>
+            <li>punctuation</li>
+            <li>basic linguistic cleanup</li>
+          </ul>
+          <h3>B. Typo correction</h3>
+          <pre>grds   → grades
+revnue → revenue</pre>
+        </div>
+        <div>
+          <h3>C. Domain terminology</h3>
+          <p class="lead" style="margin-bottom:0.6rem">Thin KB vocabulary: Entity + Measure names + synonyms. No manual “search for grds” rules.</p>
+          <pre>grds   → Grade
+revnue → Revenue</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4b -->
+    <section class="slide">
+      <div class="kicker">Component 1 · KB scope</div>
+      <h2>How much of the KB is used?</h2>
+      <p class="lead">Normalization uses only a thin KB layer. Relationships, DB mappings, business rules, examples, and detailed descriptions belong in Grounding.</p>
+      <div class="two-col">
+        <pre>Entity
+ ├── canonical name
+ └── synonyms
+
+Measure
+ ├── canonical name
+ └── synonyms</pre>
+        <div>
+          <h3>Vocabulary Index (from KB)</h3>
+          <pre>grade    → Grade
+grd      → Grade
+grds     → Grade
+
+revenue  → Revenue
+rev      → Revenue
+revnue   → Revenue</pre>
+          <p class="note">Match tokens/phrases against this index. Do not force unknown/general words into KB search.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4c -->
+    <section class="slide">
+      <div class="kicker">Component 1 · Boundary</div>
+      <h2>top / max / count / this year</h2>
+      <p class="lead">These are not domain KB concepts. They are query / intent vocabulary. Normalization does not decide SQL meaning.</p>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Normalization</h3>
+          <pre>top 10  → preserve
+max     → preserve
+this yr → this year</pre>
+          <p class="note" style="margin-top:0.75rem">Most important: do not lose information. “max revenue” must not become just “revenue”.</p>
+        </div>
+        <div class="panel">
+          <h3>Intent (later)</h3>
+          <pre>top 10    → ranking + limit 10
+max       → highest / descending
+this year → time filter</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4d -->
+    <section class="slide">
+      <div class="kicker">Component 1 · Architecture</div>
+      <h2>Normalization vs Intent vs Grounding</h2>
+      <div class="two-col">
+        <pre>USER QUESTION
+      ↓
+┌─────────────────────┐
+│   NORMALIZATION     │
+│                     │
+│ • Text cleanup      │
+│ • Typo correction   │
+│ • KB vocabulary     │
+│ • Entity recognition│
+│ • Measure recognition│
+│ • Preserve meaning  │
+└─────────────────────┘
+      ↓
+NORMALIZED QUESTION
+      ↓
+┌─────────────────────┐
+│    INTENT ENGINE    │
+│                     │
+│ top / max / count   │
+│ ranking / filter    │
+│ aggregation / etc.  │
+└─────────────────────┘
+      ↓
+      GROUNDING
+      ↓
+   QUERY IR → SQLGlot → SQL</pre>
+        <div>
+          <ul>
+            <li><strong>Normalization</strong> = “What the user said — cleaned and canonicalized.”</li>
+            <li><strong>Intent</strong> = “What the user actually wants to do — converted into query operations.”</li>
+            <li><strong>Grounding</strong> = “What those concepts mean in this database — resolved from the KB.”</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide">
+      <div class="kicker">Component 2</div>
+      <h2>Intent Layer</h2>
+      <p class="lead">Converts the Normalized Question into a structured <strong>Intent AST</strong> — what the user wants from the data. Focuses on query intent and operations, not tables, columns, joins, or SQL syntax.</p>
+      <div class="flow-line">Normalized Question → Intent Engine → Intent AST → Grounding → Query IR → SQLGlot → SQL</div>
+      <div class="two-col" style="margin-top:1rem">
+        <div class="panel">
+          <h3>Intent AST</h3>
+          <p>Generic, composable, and recursive — not a flat fixed-parameter JSON. Schema/node types are predefined; values come from the normalized question.</p>
+        </div>
+        <pre>QUERY  FILTER  AGGREGATE
+GROUP_BY  SORT  RANK
+COMPARE  SUBQUERY  TREND
+DISTINCT  TOP_N</pre>
+      </div>
+    </section>
+
+    <!-- 5b -->
+    <section class="slide">
+      <div class="kicker">Component 2 · Examples</div>
+      <h2>Aggregation &amp; Ranking</h2>
+      <div class="two-col">
+        <div>
+          <h3>Example 1 — Aggregation</h3>
+          <p class="lead">"What is the total revenue by grade?"</p>
+          <pre>AGGREGATE
+├── function: SUM
+├── metric: Revenue
+└── group_by: Grade</pre>
+        </div>
+        <div>
+          <h3>Example 2 — Ranking</h3>
+          <p class="lead">"Show the top 10 grades by revenue this year."</p>
+          <pre>RANK
+├── dimension: Grade
+├── metric: Revenue
+├── direction: DESC
+├── limit: 10
+└── filter
+      └── time: THIS_YEAR</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5c -->
+    <section class="slide">
+      <div class="kicker">Component 2 · Examples</div>
+      <h2>Comparison &amp; Subquery</h2>
+      <div class="two-col">
+        <div>
+          <h3>Example 3 — Comparison</h3>
+          <p class="lead">"Compare this year's revenue with last year's revenue."</p>
+          <pre>COMPARE
+├── left
+│   └── METRIC
+│       ├── metric: Revenue
+│       └── period: THIS_YEAR
+└── right
+    └── METRIC
+        ├── metric: Revenue
+        └── period: LAST_YEAR</pre>
+        </div>
+        <div>
+          <h3>Example 4 — Subquery</h3>
+          <p class="lead">"Show grades whose revenue is greater than the average revenue."</p>
+          <pre>FILTER
+├── left
+│   └── METRIC
+│       └── Revenue
+├── operator: >
+└── right
+    └── SUBQUERY
+        └── AGGREGATE
+            ├── function: AVG
+            └── metric: Revenue</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5d -->
+    <section class="slide">
+      <div class="kicker">Component 2 · Examples</div>
+      <h2>Complex composed Intent AST</h2>
+      <p class="lead">"Show the top 5 grades whose revenue is above the average revenue, along with their year-over-year growth."</p>
+      <pre>QUERY
+├── RANK
+│   ├── dimension: Grade
+│   ├── metric: Revenue
+│   ├── direction: DESC
+│   └── limit: 5
+│
+├── FILTER
+│   └── Revenue > SUBQUERY → AVG(Revenue)
+│
+└── COMPARE
+    ├── Revenue
+    ├── THIS_YEAR
+    └── LAST_YEAR</pre>
+      <p class="note">Ranking, filtering, subqueries, and comparisons can compose in one Intent AST.</p>
+    </section>
+
+    <!-- 5e -->
+    <section class="slide">
+      <div class="kicker">Component 2 · Schema</div>
+      <h2>Predefined vs Dynamic</h2>
+      <div class="two-col">
+        <div>
+          <h3>Predefined (schema)</h3>
+          <pre>Node Types: RANK FILTER AGGREGATE
+COMPARE SUBQUERY SORT TREND
+
+Aggregations: SUM AVG COUNT MIN MAX
+Operators: = > < >= <= IN BETWEEN
+Directions: ASC DESC</pre>
+        </div>
+        <div>
+          <h3>Dynamic (from question)</h3>
+          <pre>Grade
+Revenue
+Curriculum
+Learner
+Payment
+10
+5000
+THIS_YEAR
+LAST_YEAR</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5f -->
+    <section class="slide">
+      <div class="kicker">Component 2 · Boundary</div>
+      <h2>Intent vs Grounding</h2>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Intent identifies</h3>
+          <pre>dimension = Grade
+metric = Revenue
+operation = RANK</pre>
+          <p class="note" style="margin-top:0.75rem">Does not pick tables, columns, joins, or SQL.</p>
+        </div>
+        <div class="panel">
+          <h3>Grounding resolves</h3>
+          <pre>Grade → entity/table/column mapping
+Revenue → measure definition + DB mapping
+THIS_YEAR → date column + business rule</pre>
+        </div>
+      </div>
+      <div class="takeaway" style="margin-top:1.25rem">
+        Intent = What does the user want? · Grounding = What do those concepts mean in this database? · Query IR = How should that request be structurally executed? · SQLGlot = How should that structure be expressed as SQL?
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide">
+      <div class="kicker">Component 3</div>
+      <h2>KB Grounding</h2>
+      <p class="lead">Purpose: resolve the concepts from the Intent AST against the existing Knowledge Base.</p>
+      <div class="two-col">
+        <ul>
+          <li>Schema KB</li>
+          <li>Semantic KB</li>
+          <li>Example KB</li>
+          <li>Relationship information</li>
+          <li>Business knowledge</li>
+          <li>Metric definitions</li>
+          <li>Column mappings</li>
+          <li>Synonyms</li>
+          <li>Rules / Guardrails</li>
+        </ul>
+        <div>
+          <div class="flow-line">Intent AST + NormalizedQuestion → BM25 + Vector Retrieval → Rules → Reranking → GroundedContext</div>
+          <pre>revenue → Metric Definition → SUM(public_academic_bag.net_price)
+
+grade → Semantic Mapping → public_grades_master.name
+
+grade ↔ revenue → Relationship KB → valid JOIN path</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide">
+      <div class="kicker">Component 4</div>
+      <h2>Query IR Generator</h2>
+      <p class="lead">Purpose: convert grounded information into a structured intermediate representation. SQL is not generated at this stage.</p>
+      <div class="two-col">
+        <pre>QueryIR(
+  source=...,
+  joins=[...],
+  filters=[...],
+  dimensions=[...],
+  measures=[...],
+  group_by=[...],
+  order_by=[...],
+  limit=10
+)</pre>
+        <div>
+          <h3>IR validation</h3>
+          <ul>
+            <li>Table and column existence</li>
+            <li>Valid JOIN paths</li>
+            <li>Aggregation validity</li>
+            <li>GROUP BY consistency</li>
+            <li>Metric validity</li>
+            <li>Filter datatype compatibility</li>
+            <li>Business-rule compliance</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide">
+      <div class="kicker">Component 5</div>
+      <h2>SQL Builder</h2>
+      <p class="lead">Purpose: deterministically convert the validated QueryIR into SQL using SQLGlot.</p>
+      <div class="flow-line">QueryIR → SQLGlot AST → SQL</div>
+      <p class="note">No LLM is required for SQL construction.</p>
+      <ul>
+        <li>No table hallucination</li>
+        <li>No column hallucination</li>
+        <li>No prompt-based SQL generation</li>
+        <li>Controlled SQL dialect</li>
+        <li>Reproducible output</li>
+      </ul>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide">
+      <div class="kicker">Component 6</div>
+      <h2>SQL Validator</h2>
+      <p class="lead">Purpose: validate the generated SQL before execution.</p>
+      <ul>
+        <li>SQL parsing</li>
+        <li>Schema validation</li>
+        <li>Safety validation</li>
+        <li>Business-rule validation</li>
+        <li>Execution validation</li>
+      </ul>
+      <div class="panel" style="margin-top:1rem; max-width:70ch">
+        <p>If execution fails: classify the error deterministically → repair IR when possible → regenerate SQL. Use an LLM only when the failure requires unresolved semantic reasoning.</p>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide">
+      <div class="kicker">Section 8</div>
+      <h2>Conditional LLM Usage</h2>
+      <p class="lead">The LLM is a fallback reasoning component, not the brain of the complete system.</p>
+      <ul>
+        <li><strong>Normal Path:</strong> Question → Normalizer → Intent → KB → IR → SQLGlot → SQL</li>
+        <li><strong>Ambiguous Language:</strong> Normalizer → uncertainty → LLM → normalized representation</li>
+        <li><strong>Low-Confidence Grounding:</strong> KB retrieval → low confidence → LLM semantic resolver → GroundedContext</li>
+        <li><strong>Execution Failure:</strong> SQL → DB error → deterministic repair → LLM only if unresolved</li>
+      </ul>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide">
+      <div class="kicker">Section 9</div>
+      <h2>Confidence-Based Control</h2>
+      <table>
+        <thead>
+          <tr><th>Confidence</th><th>Action</th><th>Goal</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>≥ 0.90</td><td>Continue</td><td>High-confidence result</td></tr>
+          <tr><td>0.70–0.90</td><td>Retrieve / rerank</td><td>Resolve uncertainty without immediate LLM use</td></tr>
+          <tr><td>&lt; 0.70</td><td>LLM fallback / clarification</td><td>Use reasoning when deterministic methods are insufficient</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide">
+      <div class="kicker">Section 10</div>
+      <h2>Why This Architecture?</h2>
+      <ul>
+        <li>Minimum practical dependency on LLMs</li>
+        <li>Knowledge Base remains the semantic source of truth</li>
+        <li>Deterministic and reproducible SQL generation</li>
+        <li>Clear separation of language understanding, grounding and SQL construction</li>
+        <li>Lower risk of hallucinated schema objects</li>
+        <li>Independent testing of every pipeline stage</li>
+        <li>Better debugging and observability</li>
+        <li>Easier benchmarking across a large question set</li>
+      </ul>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide">
+      <div class="kicker">Section 11</div>
+      <h2>End-to-End Example</h2>
+      <table>
+        <thead>
+          <tr><th>Component</th><th>Result</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>User</td><td>What are the top 10 grades by revenue this year?</td></tr>
+          <tr><td>Normalization</td><td>Canonical question + concepts: grade, revenue, this year</td></tr>
+          <tr><td>Intent</td><td>RANK AST: Grade × Revenue, DESC, limit 10, THIS_YEAR filter</td></tr>
+          <tr><td>Grounding</td><td>Resolve metric, dimension, date semantics and JOIN path from KB</td></tr>
+          <tr><td>IR</td><td>Build source, joins, filters, measures, grouping and ordering</td></tr>
+          <tr><td>SQL Builder</td><td>Convert QueryIR into SQLGlot AST and SQL</td></tr>
+          <tr><td>Validation</td><td>Parse, schema-check, safety-check and execute</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide">
+      <div class="kicker">Section 12</div>
+      <h2>Final Architecture</h2>
+      <div class="arrow-stack">
+        <div class="node">USER</div><div class="down">↓</div>
+        <div class="node">NORMALIZATION</div><div class="down">↓</div>
+        <div class="node">INTENT</div><div class="down">↓</div>
+        <div class="node">SEMANTIC KB + SCHEMA KB + RELATIONSHIPS + BUSINESS RULES</div><div class="down">↓</div>
+        <div class="node">QUERY IR</div><div class="down">↓</div>
+        <div class="node">SQLGLOT</div><div class="down">↓</div>
+        <div class="node">SQL VALIDATION</div><div class="down">↓</div>
+        <div class="node">DATABASE</div>
+      </div>
+    </section>
+
+    <!-- 15 -->
+    <section class="slide">
+      <div class="kicker">Section 13</div>
+      <h2>Detailed Walkthrough</h2>
+      <p class="lead">The following example shows how one natural-language question moves through the complete pipeline. The example is intentionally simple enough to explain the architecture, while demonstrating the separation between language understanding, KB grounding, IR construction, and deterministic SQL generation.</p>
+      <div class="kicker" style="margin-top:1.5rem">Example Question</div>
+      <p class="quote">"What are the top 10 grades by revenue this year?"</p>
+    </section>
+
+    <!-- 16 -->
+    <section class="slide">
+      <div class="kicker">Walkthrough · Step 1</div>
+      <h2>User Question</h2>
+      <p class="lead">Input:</p>
+      <p class="quote">"What are the top 10 grades by revenue this year?"</p>
+      <div class="panel" style="max-width:70ch">
+        <p>At this point the system has only the user's natural-language request. It does not yet assume which tables, columns, metrics, or JOINs are required.</p>
+      </div>
+    </section>
+
+    <!-- 17 -->
+    <section class="slide scroll-ok">
+      <div class="kicker">Walkthrough · Step 2</div>
+      <h2>Normalization</h2>
+      <p class="lead">Clean + canonicalize while preserving meaning. Thin KB vocabulary for Entity/Measure terms. Preserve query words like top and max; do not assign SQL meaning here.</p>
+      <p style="margin-bottom:0.5rem">Input → Raw user question</p>
+      <p class="quote" style="font-size:1.15rem">"show me top 10 grds having max revnue in this yr"</p>
+      <pre>{
+  "original_question": "show me top 10 grds having max revnue in this yr",
+  "normalized_question":
+    "Show me the top 10 grades having max revenue this year.",
+  "concepts": [
+    { "original": "top 10", "canonical": "top 10" },
+    { "original": "grds", "canonical": "Grade" },
+    { "original": "max", "canonical": "max" },
+    { "original": "revnue", "canonical": "Revenue" },
+    { "original": "this yr", "canonical": "this year" }
+  ]
+}</pre>
+    </section>
+
+    <!-- 18 -->
+    <section class="slide">
+      <div class="kicker">Walkthrough · Step 3</div>
+      <h2>Intent Engine → Intent AST</h2>
+      <p class="lead">Converts the Normalized Question into a composable Intent AST. Answers what operations the user wants — not which database objects to use. No physical tables or columns here.</p>
+      <pre>RANK
+├── dimension: Grade
+├── metric: Revenue
+├── direction: DESC
+├── limit: 10
+└── filter
+      └── time: THIS_YEAR</pre>
+      <p class="note">top / max / this year become RANK + limit, DESC, and a time filter — not SQL yet.</p>
+    </section>
+
+    <!-- 19 -->
+    <section class="slide">
+      <div class="kicker">Walkthrough · Step 4</div>
+      <h2>KB Grounding</h2>
+      <p class="lead">Now the system uses the Intent AST plus the normalized question to retrieve and resolve information from the KB.</p>
+      <div class="two-col">
+        <pre>Intent AST + NormalizedQuestion
+        ↓
+BM25 retrieval + Vector retrieval
+        ↓
+Rules / mappings
+        ↓
+Reranking
+        ↓
+GroundedContext</pre>
+        <div>
+          <h3>Example resolutions</h3>
+          <ul>
+            <li>'revenue' → Metric Definition → SUM(public_academic_bag.net_price)</li>
+            <li>'grade' → Semantic Mapping → public_grades_master.name</li>
+            <li>grade ↔ revenue → Relationship KB → valid JOIN path</li>
+            <li>'this year' → Date/business rule → appropriate date predicate and source column</li>
+          </ul>
+          <p class="note">The KB, not the LLM, determines how 'revenue' is implemented in this database.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 20 -->
+    <section class="slide">
+      <div class="kicker">Walkthrough · Step 5</div>
+      <h2>Grounded Context</h2>
+      <p class="lead">After grounding, the system has enough information to build a query.</p>
+      <pre>{
+  "metric": {
+    "name": "revenue",
+    "expression": "SUM(public_academic_bag.net_price)"
+  },
+  "dimension": {
+    "name": "grade",
+    "column": "public_grades_master.name"
+  },
+  "relationships": ["valid grade-to-revenue JOIN path"],
+  "filters": ["this_year date predicate"]
+}</pre>
+      <p class="note">This is the point where business meaning has been grounded into database meaning.</p>
+    </section>
+
+    <!-- 21 -->
+    <section class="slide">
+      <div class="kicker">Walkthrough · Step 6</div>
+      <h2>Query IR Generation</h2>
+      <p class="lead">The IR Generator takes the grounded context and constructs a structured query plan. This is still not raw SQL.</p>
+      <pre>SELECT
+  dimension = public_grades_master.name
+  measure = SUM(public_academic_bag.net_price)
+
+FROM
+  grounded source table
+
+JOIN
+  grounded valid relationship
+
+WHERE
+  grounded this-year predicate
+
+GROUP BY
+  public_grades_master.name
+
+ORDER BY
+  SUM(public_academic_bag.net_price) DESC
+
+LIMIT
+  10</pre>
+      <p style="margin-top:0.75rem; color:var(--muted); max-width:70ch">The IR validator can now check whether every table/column exists, the JOIN path is valid, aggregation and GROUP BY are consistent, filters are compatible, and business rules are satisfied.</p>
+    </section>
+
+    <!-- 22 -->
+    <section class="slide">
+      <div class="kicker">Walkthrough · Step 7</div>
+      <h2>SQL Builder with SQLGlot</h2>
+      <p class="lead">Only after the IR passes validation do we build SQL. SQLGlot converts the IR into a SQL AST and renders the target SQL dialect.</p>
+      <div class="flow-line">QueryIR → SQLGlot AST → SQL</div>
+      <pre>SELECT
+    public_grades_master.name AS grade,
+    SUM(public_academic_bag.net_price) AS revenue
+FROM ...
+JOIN ... ON ...
+WHERE ...
+GROUP BY public_grades_master.name
+ORDER BY revenue DESC
+LIMIT 10;</pre>
+      <p style="margin-top:0.75rem; color:var(--muted); max-width:70ch">The exact FROM, JOIN, and WHERE clauses come from the grounded KB information and QueryIR; they are not invented by an LLM.</p>
+    </section>
+
+    <!-- 23 -->
+    <section class="slide">
+      <div class="kicker">Walkthrough · Steps 8–9</div>
+      <h2>SQL Validation, Execution &amp; Result</h2>
+      <div class="two-col">
+        <div>
+          <h3>Before execution</h3>
+          <ul>
+            <li>Parse the generated SQL.</li>
+            <li>Validate referenced schema objects.</li>
+            <li>Check safety constraints.</li>
+            <li>Check applicable business rules.</li>
+            <li>Execute the query.</li>
+          </ul>
+          <div class="panel" style="margin-top:0.75rem">
+            <p>If execution fails, first classify the error deterministically. If the issue can be fixed by changing the IR or applying a known rule, repair the IR and regenerate SQL. If the issue is genuinely semantic and cannot be resolved deterministically, invoke the LLM as a fallback.</p>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Final Result</h3>
+          <p>The database returns the top 10 grades and their revenue values. A downstream response/visualization layer can then present the result to the user.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 24 -->
+    <section class="slide">
+      <div class="kicker">Walkthrough</div>
+      <h2>Complete Example Flow</h2>
+      <div class="two-col">
+        <div class="arrow-stack">
+          <div class="node">User Question</div><div class="down">↓</div>
+          <div class="node">Normalization</div><div class="down">↓</div>
+          <div class="node">NormalizedQuestion</div><div class="down">↓</div>
+          <div class="node">Intent Engine</div><div class="down">↓</div>
+          <div class="node">Intent AST</div><div class="down">↓</div>
+          <div class="node">KB Grounding</div><div class="down">↓</div>
+          <div class="node">GroundedContext</div>
+        </div>
+        <div class="arrow-stack">
+          <div class="node">Query IR + Validation</div><div class="down">↓</div>
+          <div class="node">SQLGlot</div><div class="down">↓</div>
+          <div class="node">SQL + Validation</div><div class="down">↓</div>
+          <div class="node">Database</div><div class="down">↓</div>
+          <div class="node">Final Answer</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 25 -->
+    <section class="slide">
+      <div class="kicker">Key Takeaway</div>
+      <h2>Where the LLM fits</h2>
+      <div class="takeaway">
+        The LLM does not need to generate SQL. It is used only where language interpretation or semantic ambiguity cannot be handled confidently by deterministic logic and the KB. The KB supplies the business and database knowledge, QueryIR provides the control layer, and SQLGlot provides deterministic SQL construction.
+      </div>
+    </section>
+
+    <!-- 26 -->
+    <section class="slide">
+      <div class="kicker">Section 17</div>
+      <h2>IR Generation — Detailed Design</h2>
+      <p class="lead">IR (Intermediate Representation) generation is the deterministic bridge between the user's intent and SQL. It should not depend on an LLM. The IR Generator receives two structured inputs: the Intent AST and the Grounded Context.</p>
+      <pre>Intent AST  +  Grounded Context
+↓
+IR Generator
+↓
+QueryIR</pre>
+    </section>
+
+    <!-- 27 -->
+    <section class="slide">
+      <div class="kicker">17.1</div>
+      <h2>What the Intent AST Represents</h2>
+      <p class="lead">The Intent AST describes what the user wants without containing database-specific implementation details.</p>
+      <p style="margin-bottom:0.75rem">Example question: “What are the top 10 grades by revenue this year?”</p>
+      <pre>RANK
+├── dimension: Grade
+├── metric: Revenue
+├── direction: DESC
+├── limit: 10
+└── filter
+      └── time: THIS_YEAR</pre>
+    </section>
+
+    <!-- 28 -->
+    <section class="slide">
+      <div class="kicker">17.2</div>
+      <h2>What Grounding Provides</h2>
+      <p class="lead">The Grounding stage resolves the business concepts in the Intent AST against the Knowledge Base.</p>
+      <pre>revenue
+    → SUM(public_academic_bag.net_price)
+
+grade
+    → public_grades_master.name
+
+relationship
+    → academic_bag → enrollment → grade
+
+this_year
+    → appropriate date predicate</pre>
+    </section>
+
+    <!-- 29 -->
+    <section class="slide">
+      <div class="kicker">17.3</div>
+      <h2>IR Generator</h2>
+      <p class="lead">The IR Generator combines the Intent AST and Grounded Context using deterministic mapping rules. It translates intent operations into executable query structures.</p>
+      <pre>Intent AST + Grounded Context
+        ↓
+    IR Builder
+        ↓
+┌──────────────────────────┐
+│ QueryIR                  │
+│                          │
+│ FROM                     │
+│ JOIN                     │
+│ SELECT                   │
+│ FILTER                   │
+│ GROUP BY                 │
+│ ORDER BY                 │
+│ LIMIT                    │
+└──────────────────────────┘</pre>
+    </section>
+
+    <!-- 30 -->
+    <section class="slide scroll-ok">
+      <div class="kicker">17.4</div>
+      <h2>Example QueryIR</h2>
+      <pre>{
+  "from": "public_academic_bag",
+  "joins": [
+    { "table": "public_learner_enrollment", "on": "..." },
+    { "table": "public_grades_master", "on": "..." }
+  ],
+  "select": [
+    { "expression": "public_grades_master.name", "alias": "grade" },
+    { "expression": "SUM(public_academic_bag.net_price)", "alias": "revenue" }
+  ],
+  "filters": [
+    { "expression": "...", "operator": "...", "value": "..." }
+  ],
+  "group_by": ["public_grades_master.name"],
+  "order_by": [
+    { "expression": "revenue", "direction": "DESC" }
+  ],
+  "limit": 10
+}</pre>
+    </section>
+
+    <!-- 31 -->
+    <section class="slide">
+      <div class="kicker">17.5 – 17.6</div>
+      <h2>Deterministic IR &amp; Validation</h2>
+      <div class="two-col">
+        <div>
+          <h3>Why IR should be deterministic</h3>
+          <ul>
+            <li>The Intent AST already describes the required operations.</li>
+            <li>Grounding has already resolved the concepts into database-specific information.</li>
+            <li>The IR Generator only needs to combine these two structured inputs.</li>
+            <li>Deterministic construction makes the query plan reproducible and easier to test.</li>
+            <li>The IR can be validated before any SQL is generated.</li>
+            <li>An LLM is therefore unnecessary for normal IR creation.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Validate before SQLGlot</h3>
+          <ul>
+            <li>Every referenced table exists.</li>
+            <li>Every referenced column exists.</li>
+            <li>The selected metric is valid.</li>
+            <li>JOIN paths are valid according to the KB.</li>
+            <li>Aggregations are compatible with GROUP BY.</li>
+            <li>Filters are compatible with column datatypes.</li>
+            <li>ORDER BY expressions are valid.</li>
+            <li>LIMIT/OFFSET values are valid.</li>
+            <li>Business rules and guardrails are satisfied.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 32 -->
+    <section class="slide">
+      <div class="kicker">17.7</div>
+      <h2>Final Separation of Responsibilities</h2>
+      <table>
+        <thead>
+          <tr><th>Stage</th><th>Question it answers</th><th>Example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Intent</td><td>What does the user want?</td><td>Rank grades by revenue</td></tr>
+          <tr><td>Grounding</td><td>What do those concepts mean in this database?</td><td>revenue → SUM(net_price)</td></tr>
+          <tr><td>IR</td><td>How should the grounded request be structurally executed?</td><td>GROUP BY grade, ORDER BY revenue DESC, LIMIT 10</td></tr>
+          <tr><td>SQLGlot</td><td>How do we express that structure as SQL?</td><td>Generate SQL AST and render SQL</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 33 -->
+    <section class="slide">
+      <div class="kicker">17.8</div>
+      <h2>Overall Flow</h2>
+      <div class="arrow-stack" style="max-width:420px; margin: 0 auto;">
+        <div class="node">NORMALIZED QUESTION</div><div class="down">↓</div>
+        <div class="node">INTENT PARSER</div><div class="down">↓</div>
+        <div class="node">Intent AST</div><div class="down">↓</div>
+        <div class="node">KB GROUNDING</div><div class="down">↓</div>
+        <div class="node">Grounded Intent AST</div><div class="down">↓</div>
+        <div class="node">IR GENERATOR</div><div class="down">↓</div>
+        <div class="node">QueryIR</div><div class="down">↓</div>
+        <div class="node">IR VALIDATOR</div><div class="down">↓</div>
+        <div class="node">SQLGLOT</div><div class="down">↓</div>
+        <div class="node">SQL</div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="nav">
+    <button id="prev" type="button">← Prev</button>
+    <div class="progress">
+      <span id="counter">1 / 1</span>
+      <div class="bar"><i id="bar"></i></div>
+    </div>
+    <button id="next" type="button">Next →</button>
+  </div>
+
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const prevBtn = document.getElementById("prev");
+      const nextBtn = document.getElementById("next");
+      const counter = document.getElementById("counter");
+      const bar = document.getElementById("bar");
+      let i = 0;
+
+      function show(n) {
+        i = Math.max(0, Math.min(slides.length - 1, n));
+        slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+        counter.textContent = (i + 1) + " / " + slides.length;
+        bar.style.width = ((i + 1) / slides.length * 100) + "%";
+        prevBtn.disabled = i === 0;
+        nextBtn.disabled = i === slides.length - 1;
+        slides[i].scrollTop = 0;
+      }
+
+      prevBtn.addEventListener("click", () => show(i - 1));
+      nextBtn.addEventListener("click", () => show(i + 1));
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+          e.preventDefault();
+          show(i + 1);
+        } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+          e.preventDefault();
+          show(i - 1);
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          show(0);
+        } else if (e.key === "End") {
+          e.preventDefault();
+          show(slides.length - 1);
+        }
+      });
+
+      show(0);
+    })();
+  </script>
+</body>
+</html>

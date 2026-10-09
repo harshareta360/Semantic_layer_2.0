@@ -1,0 +1,42 @@
+{
+  "distinct": false,
+  "from": [],
+  "group_by": [
+    {
+      "concept": "School",
+      "type": "DIMENSION_REF"
+    }
+  ],
+  "having": null,
+  "limit": 4,
+  "offset": null,
+  "operations": [
+    {
+      "dimension": {
+        "concept": "School",
+        "type": "DIMENSION_REF"
+      },
+      "direction": "ASC",
+      "limit": 4,
+      "metric": {
+        "concept": "Revenue",
+        "type": "METRIC_REF"
+      },
+      "type": "RANK"
+    }
+  ],
+  "order_by": [],
+  "select": [
+    {
+      "concept": "School",
+      "type": "DIMENSION_REF"
+    },
+    {
+      "concept": "Revenue",
+      "type": "METRIC_REF"
+    }
+  ],
+  "set_operation": null,
+  "type": "QUERY",
+  "where": null
+}

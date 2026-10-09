@@ -1,0 +1,44 @@
+[
+  {
+    "canonical": "Grade",
+    "category": "ENTITY",
+    "synonyms": ["grade", "grades", "grd", "grds", "standard", "standards"],
+    "display_form": "grade"
+  },
+  {
+    "canonical": "Revenue",
+    "category": "MEASURE",
+    "synonyms": ["revenue", "revenues", "rev", "revnue", "revnu", "income"],
+    "display_form": "revenue"
+  },
+  {
+    "canonical": "Learner",
+    "category": "ENTITY",
+    "synonyms": ["learner", "learners", "student", "students"],
+    "display_form": "learner"
+  },
+  {
+    "canonical": "Curriculum",
+    "category": "ENTITY",
+    "synonyms": ["curriculum", "curricula", "curr", "course", "courses"],
+    "display_form": "curriculum"
+  },
+  {
+    "canonical": "Enrollment",
+    "category": "MEASURE",
+    "synonyms": ["enrollment", "enrollments", "enrolment", "registrations"],
+    "display_form": "enrollment"
+  },
+  {
+    "canonical": "Payment",
+    "category": "ENTITY",
+    "synonyms": ["payment", "payments"],
+    "display_form": "payment"
+  },
+  {
+    "canonical": "School",
+    "category": "ENTITY",
+    "synonyms": ["school", "schools"],
+    "display_form": "school"
+  }
+]

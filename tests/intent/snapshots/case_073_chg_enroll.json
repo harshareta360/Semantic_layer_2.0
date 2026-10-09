@@ -1,0 +1,36 @@
+{
+  "distinct": false,
+  "from": [],
+  "group_by": [],
+  "having": null,
+  "limit": null,
+  "offset": null,
+  "operations": [
+    {
+      "change_type": "PERCENT_CHANGE",
+      "current_period": "THIS_YEAR",
+      "metric": {
+        "concept": "Enrollment",
+        "type": "METRIC_REF"
+      },
+      "previous_period": "LAST_YEAR",
+      "type": "CHANGE"
+    }
+  ],
+  "order_by": [],
+  "select": [
+    {
+      "change_type": "PERCENT_CHANGE",
+      "current_period": "THIS_YEAR",
+      "metric": {
+        "concept": "Enrollment",
+        "type": "METRIC_REF"
+      },
+      "previous_period": "LAST_YEAR",
+      "type": "CHANGE"
+    }
+  ],
+  "set_operation": null,
+  "type": "QUERY",
+  "where": null
+}

@@ -1,0 +1,347 @@
+# Priority: higher first. Tie-break: pattern id ascending (applied in code).
+
+- id: unsupported_window
+  priority: 200
+  builder: unsupported_window
+  requires:
+    - "\\bwindow\\s+function"
+  params: {}
+
+- id: rank_top_n_by_metric
+  priority: 100
+  builder: rank
+  requires:
+    - "\\btop\\s+\\d+"
+    - "\\bby\\b"
+  params:
+    direction: DESC
+
+- id: rank_bottom_n_by_metric
+  priority: 100
+  builder: rank
+  requires:
+    - "\\bbottom\\s+\\d+"
+    - "\\bby\\b"
+  params:
+    direction: ASC
+
+- id: rank_cheapest
+  priority: 98
+  builder: rank
+  requires:
+    - "\\b(cheapest|lowest\\s+priced)\\b"
+  params:
+    direction: ASC
+    limit: 1
+
+- id: rank_most_expensive
+  priority: 98
+  builder: rank
+  requires:
+    - "\\b(most\\s+expensive|priciest)\\b"
+  params:
+    direction: DESC
+    limit: 1
+
+- id: rank_which_highest
+  priority: 97
+  builder: rank
+  requires:
+    - "\\bwhich\\b"
+    - "\\b(highest|most|maximum|max)\\b"
+  params:
+    direction: DESC
+    limit: 1
+
+- id: rank_which_lowest
+  priority: 97
+  builder: rank
+  requires:
+    - "\\bwhich\\b"
+    - "\\b(lowest|least|minimum|min)\\b"
+  params:
+    direction: ASC
+    limit: 1
+
+- id: subquery_gt_average
+  priority: 95
+  builder: subquery_threshold
+  requires:
+    - "(greater|higher|more)\\s+than\\s+(the\\s+)?(overall\\s+)?average"
+  params:
+    comparator: ">"
+
+- id: group_having_more_than
+  priority: 78
+  builder: group_count_threshold
+  requires:
+    - "\\b(with|having)\\s+more\\s+than\\s+\\d"
+  params:
+    comparator: ">"
+
+- id: group_having_less_than
+  priority: 78
+  builder: group_count_threshold
+  requires:
+    - "\\b(with|having)\\s+(less|fewer)\\s+than\\s+\\d"
+  params:
+    comparator: "<"
+
+- id: ratio_percentage
+  priority: 90
+  builder: ratio
+  requires:
+    - "\\b(percentage|percent|share)\\b"
+  params:
+    output: PERCENTAGE
+
+- id: compare_periods
+  priority: 88
+  builder: compare
+  requires:
+    - "\\b(vs|versus|compare|compared)\\b"
+  params:
+    comparison_type: PERIOD_OVER_PERIOD
+
+- id: change_yoy
+  priority: 87
+  builder: change
+  requires:
+    - "\\b(growth|yoy|year over year|change)\\b"
+  params:
+    change_type: PERCENT_CHANGE
+
+- id: aggregate_average_by
+  priority: 80
+  builder: aggregate_group
+  requires:
+    - "\\b(average|avg)\\b"
+    - "\\bby\\b"
+  params:
+    function: AVG
+
+- id: aggregate_total_by
+  priority: 80
+  builder: aggregate_group
+  requires:
+    - "\\b(total|sum)\\b"
+    - "\\bby\\b"
+  params:
+    function: SUM
+
+- id: aggregate_total
+  priority: 70
+  builder: aggregate
+  requires:
+    - "\\b(total|sum)\\b"
+  params:
+    function: SUM
+
+- id: aggregate_average
+  priority: 70
+  builder: aggregate
+  requires:
+    - "\\b(average|avg)\\b"
+  params:
+    function: AVG
+
+- id: aggregate_max
+  priority: 70
+  builder: aggregate
+  requires:
+    - "\\b(maximum|max)\\b"
+  ambiguity_if:
+    - "\\bby\\b"
+  params:
+    function: MAX
+
+- id: aggregate_min
+  priority: 70
+  builder: aggregate
+  requires:
+    - "\\b(minimum|min)\\b"
+  ambiguity_if:
+    - "\\bby\\b"
+  params:
+    function: MIN
+
+- id: count_entity
+  priority: 70
+  builder: count
+  requires:
+    - "\\b(how many|count)\\b"
+  params:
+    function: COUNT
+
+- id: threshold_greater
+  priority: 65
+  builder: threshold_filter
+  requires:
+    - "(greater|more|higher)\\s+than\\s+\\d"
+  params:
+    comparator: ">"
+
+- id: threshold_less
+  priority: 65
+  builder: threshold_filter
+  requires:
+    - "(less|lower)\\s+than\\s+\\d"
+  params:
+    comparator: "<"
+
+- id: threshold_above
+  priority: 65
+  builder: threshold_filter
+  requires:
+    - "\\b(above|over)\\s+\\d"
+  params:
+    comparator: ">"
+
+- id: threshold_below
+  priority: 65
+  builder: threshold_filter
+  requires:
+    - "\\b(below|under)\\s+\\d"
+  params:
+    comparator: "<"
+
+- id: threshold_at_least
+  priority: 65
+  builder: threshold_filter
+  requires:
+    - "\\b(at\\s+least|>=)\\s*\\d"
+  params:
+    comparator: ">="
+
+- id: threshold_at_most
+  priority: 65
+  builder: threshold_filter
+  requires:
+    - "\\b(at\\s+most|<=)\\s*\\d"
+  params:
+    comparator: "<="
+
+- id: threshold_between
+  priority: 66
+  builder: between_filter
+  requires:
+    - "\\bbetween\\s+\\d"
+  params: {}
+
+- id: equality_is
+  priority: 60
+  builder: equality_filter
+  requires:
+    - "\\b(whose|where|with|having)\\b"
+    - "\\b(is|are|=)\\b"
+  params: {}
+
+- id: null_is_null
+  priority: 60
+  builder: null_filter
+  requires:
+    - "\\b(is\\s+null|are\\s+null|has\\s+no|have\\s+no|without|missing)\\b"
+  params:
+    negated: false
+
+- id: null_is_not_null
+  priority: 60
+  builder: null_filter
+  requires:
+    - "\\b(is\\s+not\\s+null|are\\s+not\\s+null|has\\s+been|have\\s+been)\\b"
+  params:
+    negated: true
+
+- id: like_starts_with
+  priority: 58
+  builder: like_filter
+  requires:
+    - "\\b(starts?\\s+with|begins?\\s+with)\\b"
+  params:
+    mode: STARTS_WITH
+
+- id: like_ends_with
+  priority: 58
+  builder: like_filter
+  requires:
+    - "\\b(ends?\\s+with)\\b"
+  params:
+    mode: ENDS_WITH
+
+- id: like_contains
+  priority: 58
+  builder: like_filter
+  requires:
+    - "\\b(contains|includes|like)\\b"
+  params:
+    mode: CONTAINS
+
+- id: order_highest_to_lowest
+  priority: 45
+  builder: order_by_metric
+  requires:
+    - "\\b(highest\\s+to\\s+lowest|descending|desc)\\b"
+  params:
+    direction: DESC
+
+- id: order_lowest_to_highest
+  priority: 45
+  builder: order_by_metric
+  requires:
+    - "\\b(lowest\\s+to\\s+highest|ascending|asc)\\b"
+  params:
+    direction: ASC
+
+- id: order_sort_by
+  priority: 44
+  builder: order_by_metric
+  requires:
+    - "\\b(sort(?:ed)?\\s+by|order(?:ed)?\\s+by)\\b"
+  params:
+    direction: ASC
+
+- id: order_newest_first
+  priority: 44
+  builder: order_by_metric
+  requires:
+    - "\\b(newest\\s+first|latest\\s+first|most\\s+recent)\\b"
+  params:
+    direction: DESC
+
+- id: order_oldest_first
+  priority: 44
+  builder: order_by_metric
+  requires:
+    - "\\b(oldest\\s+first|earliest\\s+first)\\b"
+  params:
+    direction: ASC
+
+- id: relative_last_n_days
+  priority: 42
+  builder: relative_time_filter
+  requires:
+    - "\\blast\\s+\\d+\\s+days?\\b"
+  params: {}
+
+- id: time_filter
+  priority: 40
+  builder: time_filter
+  requires:
+    - "\\b(this year|last year|this month|last month|this quarter|last quarter|this week|last week|today|yesterday)\\b"
+  params: {}
+
+- id: list_distinct_entity
+  priority: 32
+  builder: list_entity
+  requires:
+    - "\\b(unique|distinct)\\b"
+  params:
+    distinct: true
+
+- id: list_show_entity
+  priority: 30
+  builder: list_entity
+  requires:
+    - "\\b(show|list|get|display|find|retrieve|give|pull|fetch|return)\\b"
+  params:
+    distinct: false

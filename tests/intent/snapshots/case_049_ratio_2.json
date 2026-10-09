@@ -1,0 +1,56 @@
+{
+  "distinct": false,
+  "from": [],
+  "group_by": [],
+  "having": null,
+  "limit": null,
+  "offset": null,
+  "operations": [
+    {
+      "denominator": {
+        "argument": {
+          "concept": "Revenue",
+          "type": "METRIC_REF"
+        },
+        "function": "SUM",
+        "type": "AGGREGATE"
+      },
+      "numerator": {
+        "argument": {
+          "concept": "Revenue",
+          "type": "METRIC_REF"
+        },
+        "function": "SUM",
+        "type": "AGGREGATE"
+      },
+      "output": "PERCENTAGE",
+      "type": "RATIO"
+    }
+  ],
+  "order_by": [],
+  "select": [
+    {
+      "denominator": {
+        "argument": {
+          "concept": "Revenue",
+          "type": "METRIC_REF"
+        },
+        "function": "SUM",
+        "type": "AGGREGATE"
+      },
+      "numerator": {
+        "argument": {
+          "concept": "Revenue",
+          "type": "METRIC_REF"
+        },
+        "function": "SUM",
+        "type": "AGGREGATE"
+      },
+      "output": "PERCENTAGE",
+      "type": "RATIO"
+    }
+  ],
+  "set_operation": null,
+  "type": "QUERY",
+  "where": null
+}

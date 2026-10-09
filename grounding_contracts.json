@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "metric_contracts": {
+    "total_revenue": {
+      "display_name": "Total Revenue",
+      "description": "Canonical cash revenue from payment_details",
+      "aliases": ["revenue", "Revenue"],
+      "grain_entities": ["Payment"],
+      "required_entities": ["Payment", "AcademicBag"],
+      "preferred_path_id": "cash_revenue_to_grade",
+      "default_time_column": "public_payment_details.created_at",
+      "default_filters": [
+        "public_payment_details.payment_status::integer = 3"
+      ],
+      "sql_expression_override": null
+    },
+    "bag_net_value": {
+      "display_name": "Net Revenue",
+      "description": "After-discount bag value (net fees)",
+      "aliases": ["net_revenue", "net revenue"],
+      "grain_entities": ["AcademicBag"],
+      "required_entities": ["AcademicBag"],
+      "preferred_path_id": "bag_net_to_grade",
+      "default_time_column": "public_academic_bag.created_at",
+      "default_filters": [
+        "public_academic_bag.payment_status::integer = 3"
+      ],
+      "sql_expression_override": null
+    }
+  },
+  "preferred_join_paths": [
+    {
+      "id": "cash_revenue_to_grade",
+      "description": "Cash path: Payment → AcademicBag → LearnerEnrollment → Grade",
+      "for_metrics": ["total_revenue"],
+      "entities": [
+        "Payment",
+        "AcademicBag",
+        "LearnerEnrollment",
+        "Grade"
+      ]
+    },
+    {
+      "id": "bag_net_to_grade",
+      "description": "Bag net path: AcademicBag → LearnerEnrollment → Grade",
+      "for_metrics": ["bag_net_value"],
+      "entities": [
+        "AcademicBag",
+        "LearnerEnrollment",
+        "Grade"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,816 @@
+[
+  {
+    "id": "rank_top_1",
+    "question": "Show the top 3 grades by revenue.",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_top_2",
+    "question": "Show the top 5 grades by revenue.",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_top_3",
+    "question": "Show the top 10 grades by revenue.",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_top_4",
+    "question": "Show the top 15 grades by revenue.",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_top_5",
+    "question": "Show the top 20 grades by revenue.",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_top_6",
+    "question": "Show the top 25 grades by revenue.",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_top_7",
+    "question": "Show the top 50 grades by revenue.",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_bot_1",
+    "question": "Show the bottom 3 grades by revenue.",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_bottom_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_bot_2",
+    "question": "Show the bottom 5 grades by revenue.",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_bottom_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_bot_3",
+    "question": "Show the bottom 10 grades by revenue.",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_bottom_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_typo",
+    "question": "show top 10 grds by revnue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_time",
+    "question": "show top 10 grades by revenue this year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "rank_last",
+    "question": "top 5 curricula by enrollment last year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "agg_total",
+    "question": "What is the total revenue?",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total"
+    ]
+  },
+  {
+    "id": "agg_sum",
+    "question": "What is the sum of revenue?",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total"
+    ]
+  },
+  {
+    "id": "agg_avg",
+    "question": "What is the average revenue?",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_average"
+    ]
+  },
+  {
+    "id": "agg_total_by",
+    "question": "What is the total revenue by grade?",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total_by"
+    ]
+  },
+  {
+    "id": "agg_avg_by",
+    "question": "What is the average revenue by curriculum?",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_average_by"
+    ]
+  },
+  {
+    "id": "agg_total_by_school",
+    "question": "total revenue by school",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total_by"
+    ]
+  },
+  {
+    "id": "agg_enrollment_by",
+    "question": "total enrollment by grade",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total_by"
+    ]
+  },
+  {
+    "id": "agg_avg_enroll",
+    "question": "average enrollment by school",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_average_by"
+    ]
+  },
+  {
+    "id": "count_1",
+    "question": "How many learners registered this year?",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "count_entity",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "count_2",
+    "question": "How many learners?",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "count_entity"
+    ]
+  },
+  {
+    "id": "count_3",
+    "question": "count learners this month",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "count_entity",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "count_4",
+    "question": "How many schools?",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "count_entity"
+    ]
+  },
+  {
+    "id": "count_5",
+    "question": "count grades",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "count_entity"
+    ]
+  },
+  {
+    "id": "th_1",
+    "question": "Show grades with revenue greater than 5000",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "threshold_greater"
+    ]
+  },
+  {
+    "id": "th_2",
+    "question": "revenue greater than 10000",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "threshold_greater"
+    ]
+  },
+  {
+    "id": "th_3",
+    "question": "grades with revenue less than 1000",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "threshold_less"
+    ]
+  },
+  {
+    "id": "th_4",
+    "question": "enrollment greater than 200",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "threshold_greater"
+    ]
+  },
+  {
+    "id": "th_5",
+    "question": "revenue higher than 7500",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "threshold_greater"
+    ]
+  },
+  {
+    "id": "time_1",
+    "question": "total revenue this year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "time_2",
+    "question": "total revenue last year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "time_3",
+    "question": "total revenue this month",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "time_4",
+    "question": "total revenue last month",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "time_5",
+    "question": "total revenue this quarter",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "time_6",
+    "question": "total enrollment this year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "cmp_1",
+    "question": "Compare this year's revenue with last year's revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "compare_periods"
+    ]
+  },
+  {
+    "id": "cmp_2",
+    "question": "revenue this year vs last year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "compare_periods"
+    ]
+  },
+  {
+    "id": "cmp_3",
+    "question": "compare enrollment this year versus last year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "compare_periods"
+    ]
+  },
+  {
+    "id": "cmp_4",
+    "question": "Compare this month revenue with last month revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "compare_periods"
+    ]
+  },
+  {
+    "id": "chg_1",
+    "question": "Show year over year revenue growth",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "change_yoy"
+    ]
+  },
+  {
+    "id": "chg_2",
+    "question": "revenue growth",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "change_yoy"
+    ]
+  },
+  {
+    "id": "chg_3",
+    "question": "yoy revenue change",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "change_yoy"
+    ]
+  },
+  {
+    "id": "chg_4",
+    "question": "enrollment growth year over year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "change_yoy"
+    ]
+  },
+  {
+    "id": "sub_1",
+    "question": "Show grades whose revenue is greater than the average revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "subquery_gt_average"
+    ]
+  },
+  {
+    "id": "sub_2",
+    "question": "grades with revenue greater than the average revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "subquery_gt_average"
+    ]
+  },
+  {
+    "id": "sub_3",
+    "question": "schools with enrollment greater than the average enrollment",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "subquery_gt_average"
+    ]
+  },
+  {
+    "id": "ratio_1",
+    "question": "What percentage of total revenue comes from Grade",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "ratio_percentage"
+    ]
+  },
+  {
+    "id": "ratio_2",
+    "question": "percentage of revenue by grade",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "ratio_percentage"
+    ]
+  },
+  {
+    "id": "ratio_3",
+    "question": "what percent of enrollment comes from school",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "ratio_percentage"
+    ]
+  },
+  {
+    "id": "ratio_4",
+    "question": "share of revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "ratio_percentage"
+    ]
+  },
+  {
+    "id": "amb_1",
+    "question": "Show the maximum revenue by grade.",
+    "expected_status": "AMBIGUOUS",
+    "expected_patterns": []
+  },
+  {
+    "id": "amb_2",
+    "question": "Show the minimum revenue by grade.",
+    "expected_status": "AMBIGUOUS",
+    "expected_patterns": []
+  },
+  {
+    "id": "amb_3",
+    "question": "maximum enrollment by school",
+    "expected_status": "AMBIGUOUS",
+    "expected_patterns": []
+  },
+  {
+    "id": "un_1",
+    "question": "Rank grades using a complex window function over revenue",
+    "expected_status": "UNSUPPORTED",
+    "expected_patterns": []
+  },
+  {
+    "id": "un_2",
+    "question": "apply a window function to revenue by grade",
+    "expected_status": "UNSUPPORTED",
+    "expected_patterns": []
+  },
+  {
+    "id": "rank_curr",
+    "question": "top 10 curricula by revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_school",
+    "question": "top 8 schools by enrollment",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_pay",
+    "question": "bottom 4 schools by revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_bottom_n_by_metric"
+    ]
+  },
+  {
+    "id": "agg_typo",
+    "question": "total revnue by grds",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total_by"
+    ]
+  },
+  {
+    "id": "agg_please",
+    "question": "what is the total revenue please",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total"
+    ]
+  },
+  {
+    "id": "count_typo",
+    "question": "how many learners this yr",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "count_entity",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "th_typo",
+    "question": "revnue greater than 5000",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "threshold_greater"
+    ]
+  },
+  {
+    "id": "rank_highest",
+    "question": "top 12 grades by enrollment this year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "agg_by_curr",
+    "question": "sum of revenue by curriculum",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total_by"
+    ]
+  },
+  {
+    "id": "avg_school",
+    "question": "average revenue by school",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_average_by"
+    ]
+  },
+  {
+    "id": "count_curr",
+    "question": "how many curricula",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "count_entity"
+    ]
+  },
+  {
+    "id": "count_pay",
+    "question": "how many payments",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "count_entity"
+    ]
+  },
+  {
+    "id": "th_enroll",
+    "question": "enrollment less than 50",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "threshold_less"
+    ]
+  },
+  {
+    "id": "time_week",
+    "question": "total revenue this week",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "time_yest",
+    "question": "total revenue yesterday",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "cmp_enroll",
+    "question": "compare this year enrollment vs last year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "compare_periods"
+    ]
+  },
+  {
+    "id": "chg_enroll",
+    "question": "enrollment yoy growth",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "change_yoy"
+    ]
+  },
+  {
+    "id": "sub_enroll",
+    "question": "grades with enrollment greater than the average enrollment",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "subquery_gt_average"
+    ]
+  },
+  {
+    "id": "ratio_school",
+    "question": "percentage of total enrollment by school",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "ratio_percentage"
+    ]
+  },
+  {
+    "id": "rank_month",
+    "question": "top 6 grades by revenue this month",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "agg_last_q",
+    "question": "total revenue last quarter",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "bottom_time",
+    "question": "bottom 7 grades by revenue last year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_bottom_n_by_metric",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "avg_time",
+    "question": "average revenue this year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_average",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "sum_by_school_time",
+    "question": "total revenue by school this year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total_by",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "count_last",
+    "question": "how many learners last year",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "count_entity",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "th_more",
+    "question": "revenue more than 9000",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "threshold_greater"
+    ]
+  },
+  {
+    "id": "th_lower",
+    "question": "revenue lower than 100",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "threshold_less"
+    ]
+  },
+  {
+    "id": "rank_20",
+    "question": "top 20 schools by revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "rank_1",
+    "question": "top 1 grade by revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "agg_min_plain",
+    "question": "what is the minimum revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_min"
+    ]
+  },
+  {
+    "id": "agg_max_plain",
+    "question": "what is the maximum revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_max"
+    ]
+  },
+  {
+    "id": "unsupported_emptyish",
+    "question": "tell me something random about bananas",
+    "expected_status": "UNSUPPORTED",
+    "expected_patterns": []
+  },
+  {
+    "id": "x1",
+    "question": "top 9 grades by enrollment",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_top_n_by_metric"
+    ]
+  },
+  {
+    "id": "x2",
+    "question": "bottom 2 curricula by revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "rank_bottom_n_by_metric"
+    ]
+  },
+  {
+    "id": "x3",
+    "question": "total enrollment",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total"
+    ]
+  },
+  {
+    "id": "x4",
+    "question": "average enrollment",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_average"
+    ]
+  },
+  {
+    "id": "x5",
+    "question": "how many learners this week",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "count_entity",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "x6",
+    "question": "revenue greater than 1",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "threshold_greater"
+    ]
+  },
+  {
+    "id": "x7",
+    "question": "total revenue today",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "aggregate_total",
+      "time_filter"
+    ]
+  },
+  {
+    "id": "x8",
+    "question": "compare revenue this quarter versus last quarter",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "compare_periods"
+    ]
+  },
+  {
+    "id": "x9",
+    "question": "revenue change growth",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "change_yoy"
+    ]
+  },
+  {
+    "id": "x10",
+    "question": "percentage share of revenue",
+    "expected_status": "VALID",
+    "expected_patterns": [
+      "ratio_percentage"
+    ]
+  },
+  {
+    "id": "x11",
+    "question": "show maximum enrollment by grade",
+    "expected_status": "AMBIGUOUS",
+    "expected_patterns": []
+  },
+  {
+    "id": "x12",
+    "question": "use a window function for ranking grades",
+    "expected_status": "UNSUPPORTED",
+    "expected_patterns": []
+  }
+]

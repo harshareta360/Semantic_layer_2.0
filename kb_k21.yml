@@ -1,0 +1,2930 @@
+db_id: 6a4954b2-0661-4cc4-886c-75c72fbabfd9
+version: 5
+timezone: Asia/Kolkata
+week_start: monday
+fiscal_year_start: 4
+content_hash: sha256:f6652be74df40e1fbb88d935b0ab827444d20f4f9e985cdeb1e641ffe6f52b61
+tables:
+- name: org_0101digitall.public_academic_bag
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: learner_id
+    type: text
+    nullable: true
+    description: FK to public_learners.id — use for JOIN only; display learner_name instead
+  - name: enrollment_id
+    type: text
+    nullable: true
+  - name: bag_status
+    type: bigint
+    nullable: true
+    description: 1=Open, 2=Submitted, 3=Approved
+  - name: is_active
+    type: boolean
+    nullable: true
+    description: true = active bag
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: max_subjects
+    type: bigint
+    nullable: true
+  - name: min_subjects
+    type: bigint
+    nullable: true
+  - name: gross_price
+    type: double precision
+    nullable: true
+    description: Fee before discounts. Use SUM(gross_price) for gross revenue / gross fees. NOT cash collected
+      — cash is payment_details.amount with payment_status=3.
+  - name: gst_per
+    type: double precision
+    nullable: true
+  - name: gst_total
+    type: double precision
+    nullable: true
+  - name: net_price
+    type: double precision
+    nullable: true
+    description: Booked bag fee (TEXT often) — NOT cash revenue; COALESCE(::numeric,0) for averages
+  - name: overall_discount_total
+    type: double precision
+    nullable: true
+  - name: taxable_price
+    type: double precision
+    nullable: true
+  - name: payment_status
+    type: bigint
+    nullable: true
+    description: 1=WaitingForPayment 2=PaymentInProgress 3=PaymentCompleted 4=PaymentFailed 5=InstallmentSetupPending
+      6=InstallmentSetupCompleted 7=InstallmentDebited 8=InstallmentSetupActive 9=InstallmentSetupFailed
+      10=InstallmentSetupCancelled 11=InstallmentSetupBounced. PaymentCompleted=3 is fully paid; 8=active
+      installment plan (not installment_payment.is_active).
+  - name: admission_type_id
+    type: text
+    nullable: true
+  - name: total_commitment_amount
+    type: double precision
+    nullable: true
+  - name: bag_type
+    type: bigint
+    nullable: true
+    description: 1=Regular, 2=AddOn
+  - name: step_progress
+    type: text
+    nullable: true
+  - name: applicable_for
+    type: text
+    nullable: true
+- name: org_0101digitall.public_academic_bag_installment
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: academic_bag_id
+    type: text
+    nullable: true
+  - name: installment_config_id
+    type: text
+    nullable: true
+  - name: installment_type
+    type: bigint
+    nullable: true
+    description: 1=Quarterly, 2=Monthly, 3=OneTimeFullPayment
+  - name: is_draft
+    type: boolean
+    nullable: true
+  - name: is_active
+    type: boolean
+    nullable: true
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: setup_link
+    type: text
+    nullable: true
+  - name: payment_via
+    type: bigint
+    nullable: true
+    description: 1=JODOInstallment 2=RazorpayOneTime 3=RazorpayInstallment 4=PaypalOneTime 5=PaypalInstallment
+      6=RazorpayDirectOneTime 7=RazorpayDirectInstallment; NULL=not set. On public_academic_bag_installment
+      (not academic_bag).
+- name: org_0101digitall.public_academic_bag_items
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: academic_bag_id
+    type: text
+    nullable: true
+  - name: product_line_id
+    type: text
+    nullable: true
+  - name: product_name
+    type: text
+    nullable: true
+  - name: product_line_price
+    type: double precision
+    nullable: true
+  - name: quantity
+    type: double precision
+    nullable: true
+  - name: gross_price
+    type: double precision
+    nullable: true
+    description: Pre-discount line gross amount
+  - name: discount_id
+    type: text
+    nullable: true
+  - name: discount_name
+    type: text
+    nullable: true
+    description: Optional discount label on the line item
+  - name: discount_value
+    type: double precision
+    nullable: true
+    description: 'Raw magnitude: percent points when discount_type=1, currency when type=2, ignored when
+      type IS NULL. Discount amount = CASE type WHEN 1 THEN gross*value/100 WHEN 2 THEN value ELSE 0 END.'
+  - name: taxable_price
+    type: double precision
+    nullable: true
+  - name: gst_per
+    type: double precision
+    nullable: true
+  - name: gst_amount
+    type: double precision
+    nullable: true
+  - name: net_price
+    type: double precision
+    nullable: true
+    description: Booked line value AFTER discount — prefer for item totals. Do not re-apply discount_type/discount_value
+      on top of net_price.
+  - name: is_mandatory
+    type: boolean
+    nullable: true
+    description: TRUE = mandatory line item (required; cannot be removed from bag); FALSE = optional
+  - name: is_active
+    type: boolean
+    nullable: true
+    description: TRUE = active line-item row; FALSE = inactive. Prefer is_active=TRUE for totals. Not
+      the same as AcademicBag.is_active or bag payment_status=8 (installment active).
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: max_quantity
+    type: double precision
+    nullable: true
+  - name: min_quantity
+    type: double precision
+    nullable: true
+  - name: is_qty_based
+    type: boolean
+    nullable: true
+  - name: discount_type
+    type: bigint
+    nullable: true
+    description: 1=Percentage (% of gross_price), 2=Absolute (currency), NULL=no discount. Controls how
+      discount_value is interpreted.
+  - name: commitment_amount
+    type: double precision
+    nullable: true
+  - name: selected_qty
+    type: double precision
+    nullable: true
+  - name: is_shippable_item
+    type: boolean
+    nullable: true
+- name: org_0101digitall.public_academic_years_master
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: code
+    type: text
+    nullable: true
+  - name: name
+    type: text
+    nullable: true
+  - name: description
+    type: text
+    nullable: true
+  - name: start_date
+    type: timestamp with time zone
+    nullable: true
+  - name: end_date
+    type: timestamp with time zone
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: is_active
+    type: boolean
+    nullable: true
+  - name: enrollment_code
+    type: text
+    nullable: true
+  - name: sequence_number
+    type: bigint
+    nullable: true
+- name: org_0101digitall.public_curriculum_master
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: code
+    type: text
+    nullable: true
+  - name: name
+    type: text
+    nullable: true
+    description: Human-readable curriculum — always prefer over curriculum_id UUID
+  - name: description
+    type: text
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: is_active
+    type: boolean
+    nullable: true
+  - name: enrollment_code
+    type: text
+    nullable: true
+  - name: section_code
+    type: text
+    nullable: true
+- name: org_0101digitall.public_grades_master
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: code
+    type: text
+    nullable: true
+  - name: name
+    type: text
+    nullable: true
+    description: Human-readable grade — always prefer over grade_id UUID
+  - name: description
+    type: text
+    nullable: true
+  - name: sort_order
+    type: bigint
+    nullable: true
+  - name: skip_previous_grade
+    type: boolean
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: is_active
+    type: boolean
+    nullable: true
+  - name: skip_second_language
+    type: boolean
+    nullable: true
+  - name: maximum_preferred_age
+    type: double precision
+    nullable: true
+  - name: maximum_previous_age
+    type: double precision
+    nullable: true
+  - name: minimum_preferred_age
+    type: double precision
+    nullable: true
+  - name: minimum_previous_age
+    type: double precision
+    nullable: true
+  - name: section_code
+    type: text
+    nullable: true
+- name: org_0101digitall.public_learner_enrollment
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: learner_id
+    type: text
+    nullable: true
+    description: FK to public_learners.id — JOIN only; display learner_name
+  - name: school_id
+    type: text
+    nullable: true
+  - name: enrollment_date
+    type: timestamp with time zone
+    nullable: true
+  - name: enrollment_number
+    type: text
+    nullable: true
+  - name: academic_year_id
+    type: text
+    nullable: true
+  - name: curriculum_id
+    type: text
+    nullable: true
+  - name: grade_id
+    type: text
+    nullable: true
+  - name: batch_id
+    type: text
+    nullable: true
+  - name: session_id
+    type: text
+    nullable: true
+  - name: past_enrollment_number
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: is_current
+    type: boolean
+    nullable: true
+    description: true = current enrollment
+  - name: preferred_second_language_id
+    type: text
+    nullable: true
+  - name: counsellor_staff_id
+    type: text
+    nullable: true
+  - name: sales_rep_staff_id
+    type: text
+    nullable: true
+  - name: enrollment_progress_step
+    type: bigint
+    nullable: true
+    description: 'Enrollment pipeline stage (not payment_details/bag payment_status). 1=EnrollmentCompleted
+      2=TestScheduled 3=TestCompleted 4=TestFailed 5=TestSkipped 6=AcademicBagInProgress 7=TierSelected
+      8=TierSkipped 9=SessionSelected 10=AcademicBagCreated 11=PaymentPending 12=InstallmentSetupPending
+      13=InstallmentSetupCompleted 14=InstallmentActive 15=InstallmentInactive 16=InstallmentCompleted
+      17=InstallmentFailed 18=PaymentCompleted 19=DocumentVerificationPending 20=DocumentVerified 21=AdmissionCompleted
+      22=InstallmentInitiatedFailed. YAML name: progress_status; warehouse column: enrollment_progress_step.'
+  - name: is_rollover
+    type: boolean
+    nullable: true
+    description: TRUE = enrollment created via rollover; FALSE = new admission
+  - name: tier_id
+    type: text
+    nullable: true
+  - name: board_id
+    type: text
+    nullable: true
+  - name: batch_size_id
+    type: text
+    nullable: true
+  - name: previous_enrollment_id
+    type: text
+    nullable: true
+  - name: rollover_id
+    type: text
+    nullable: true
+  - name: admission_type_id
+    type: text
+    nullable: true
+  - name: rollover_status
+    type: bigint
+    nullable: true
+  - name: rollover_initiate_id
+    type: text
+    nullable: true
+  - name: section_id
+    type: text
+    nullable: true
+- name: org_0101digitall.public_learners
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+    description: Internal PK only — NEVER expose as the learner label
+  - name: first_name
+    type: text
+    nullable: true
+    description: Learner given name — always prefer (with last_name) over ids
+  - name: last_name
+    type: text
+    nullable: true
+    description: Learner family name — pair with first_name as learner_name
+  - name: dob
+    type: text
+    nullable: true
+  - name: gender_id
+    type: text
+    nullable: true
+  - name: parent_id
+    type: text
+    nullable: true
+  - name: street
+    type: text
+    nullable: true
+  - name: address
+    type: text
+    nullable: true
+  - name: city
+    type: text
+    nullable: true
+  - name: country_id
+    type: text
+    nullable: true
+  - name: pin_code
+    type: text
+    nullable: true
+  - name: nationality_id
+    type: text
+    nullable: true
+  - name: previous_grade_id
+    type: text
+    nullable: true
+  - name: previous_curriculum_id
+    type: text
+    nullable: true
+  - name: previous_second_language_id
+    type: text
+    nullable: true
+  - name: email
+    type: text
+    nullable: true
+  - name: credits_active
+    type: boolean
+    nullable: true
+  - name: credits_password
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: learner_status
+    type: bigint
+    nullable: true
+  - name: previous_other_second_language
+    type: text
+    nullable: true
+  - name: learner_medium_of_instruction
+    type: text
+    nullable: true
+  - name: learner_other_reason
+    type: text
+    nullable: true
+  - name: learner_reason
+    type: text
+    nullable: true
+  - name: parent_reg_id
+    type: text
+    nullable: true
+  - name: admission_date
+    type: timestamp with time zone
+    nullable: true
+  - name: profile_picture_url
+    type: text
+    nullable: true
+  - name: crm_opportunity_id
+    type: text
+    nullable: true
+  - name: contact_person_parent_id
+    type: text
+    nullable: true
+  - name: middle_name
+    type: text
+    nullable: true
+- name: org_0101digitall.public_logistics_order_items
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: logistics_order_id
+    type: text
+    nullable: true
+  - name: item_status
+    type: bigint
+    nullable: true
+    description: 1=Pending 2=Selected 3=Confirmed 4=Shipped 5=Delivered (approx)
+  - name: logistics_shipment_id
+    type: text
+    nullable: true
+  - name: product_line_id
+    type: text
+    nullable: true
+  - name: product_name
+    type: text
+    nullable: true
+    description: Human-readable product / kit / book name
+  - name: product_price
+    type: double precision
+    nullable: true
+  - name: gst_per
+    type: double precision
+    nullable: true
+  - name: gst_amount
+    type: double precision
+    nullable: true
+  - name: net_price
+    type: double precision
+    nullable: true
+    description: Line-item net price
+  - name: is_active
+    type: boolean
+    nullable: true
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: internal_processing_status_id
+    type: text
+    nullable: true
+  - name: product_variant_value_id
+    type: text
+    nullable: true
+  - name: is_additional_item
+    type: boolean
+    nullable: true
+  - name: quantity
+    type: double precision
+    nullable: true
+  - name: academic_bag_id
+    type: text
+    nullable: true
+  - name: academic_bag_type
+    type: bigint
+    nullable: true
+  - name: payment_details_id
+    type: text
+    nullable: true
+  - name: payment_order_id
+    type: text
+    nullable: true
+- name: org_0101digitall.public_logistics_orders
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: enrollment_id
+    type: text
+    nullable: true
+    description: FK to public_learner_enrollment.id — JOIN only; display learner_name via learners
+  - name: academic_bag_id
+    type: text
+    nullable: true
+  - name: logistics_status
+    type: bigint
+    nullable: true
+    description: 'Order-level status (NOT shipment_status): 1=Pending 2=PendingPayment 3=PreparingForShipment
+      4=Shipped 5=PartiallyShipped 6=Delivered 7=PartiallyDelivered 8=EBookRequested. Codes 10/11 appear
+      in data but are unnamed — do not invent labels.'
+  - name: address_verification_status
+    type: bigint
+    nullable: true
+    description: 1=UNVERIFIED 2=PENDING_CONFIRMATION 3=SUBMITTED_BY_PARENT 4=VERIFIED 5=LOCKED
+  - name: address_request_type
+    type: bigint
+    nullable: true
+  - name: address_id
+    type: text
+    nullable: true
+  - name: contact_name
+    type: text
+    nullable: true
+  - name: contact_phone
+    type: text
+    nullable: true
+  - name: is_active
+    type: boolean
+    nullable: true
+    description: true = active logistics order
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+    description: When the logistics order was created — use date_trunc for 'orders created this month/week'
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: address_line_1
+    type: text
+    nullable: true
+  - name: address_line_2
+    type: text
+    nullable: true
+  - name: city
+    type: text
+    nullable: true
+  - name: country_id
+    type: text
+    nullable: true
+  - name: is_receiver_same_as_primary
+    type: boolean
+    nullable: true
+  - name: state_id
+    type: text
+    nullable: true
+  - name: zip_code
+    type: text
+    nullable: true
+  - name: shipment_fee_amount
+    type: double precision
+    nullable: true
+    description: Shipment fee charged on the order
+  - name: shipment_fee_currency
+    type: text
+    nullable: true
+  - name: shipment_fee_status
+    type: bigint
+    nullable: true
+    description: 1=Pending, 2=Paid, 3=Failed
+  - name: total_amount
+    type: double precision
+    nullable: true
+    description: Order total amount (numeric); many rows null/0
+  - name: total_amount_currency
+    type: text
+    nullable: true
+  - name: reinitiation_fee_amount
+    type: double precision
+    nullable: true
+  - name: reinitiation_fee_waived
+    type: boolean
+    nullable: true
+  - name: logistics_line_type
+    type: bigint
+    nullable: true
+- name: org_0101digitall.public_logistics_shipments
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: logistics_order_id
+    type: text
+    nullable: true
+  - name: shipment_number
+    type: text
+    nullable: true
+  - name: tracking_link
+    type: text
+    nullable: true
+  - name: tracking_id
+    type: text
+    nullable: true
+  - name: shipment_status
+    type: bigint
+    nullable: true
+    description: 1=Shipped, 2=Delivered
+  - name: shipped_at
+    type: timestamp with time zone
+    nullable: true
+    description: Timestamp when shipment was dispatched — use with date_trunc for 'shipped this week/month'
+      (combine with shipment_status=1)
+  - name: delivered_at
+    type: timestamp with time zone
+    nullable: true
+    description: Timestamp when shipment was delivered — use with date_trunc for 'delivered this week/month'
+      (combine with shipment_status=2)
+  - name: is_active
+    type: boolean
+    nullable: true
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+    description: When the shipment row was created
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: note
+    type: text
+    nullable: true
+  - name: delivery_failure_reason
+    type: text
+    nullable: true
+- name: org_0101digitall.public_master_list_value
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: list_id
+    type: text
+    nullable: true
+  - name: code
+    type: text
+    nullable: true
+  - name: name
+    type: text
+    nullable: true
+  - name: tooltip
+    type: text
+    nullable: true
+  - name: is_active
+    type: boolean
+    nullable: true
+  - name: parent_value_id
+    type: text
+    nullable: true
+  - name: sort_order
+    type: bigint
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: image_url
+    type: text
+    nullable: true
+  - name: is_editable
+    type: boolean
+    nullable: true
+  - name: notes
+    type: text
+    nullable: true
+- name: org_0101digitall.public_payment_details
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: parent_id
+    type: text
+    nullable: true
+  - name: order_id
+    type: text
+    nullable: true
+  - name: parent_reg_id
+    type: text
+    nullable: true
+  - name: payment_status
+    type: bigint
+    nullable: true
+    description: 2=Pending, 3=successful/collected, 4=Failed. Prefer status=3 for revenue/collections.
+  - name: pay_date
+    type: timestamp with time zone
+    nullable: true
+    description: Payment date — preferred time grain for collections
+  - name: payment_mode
+    type: text
+    nullable: true
+  - name: payment_tracking_id
+    type: text
+    nullable: true
+  - name: amount
+    type: double precision
+    nullable: true
+    description: Cash amount collected; cast ::numeric for aggregates
+  - name: currency
+    type: text
+    nullable: true
+    description: Currency code of amount (e.g. INR, USD). Do not mix currencies in a single SUM without
+      GROUP BY currency or a currency filter.
+  - name: learner_enroll_id
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: receipt_url
+    type: text
+    nullable: true
+  - name: academic_bag_id
+    type: text
+    nullable: true
+  - name: payment_type
+    type: bigint
+    nullable: true
+    description: 1=RegistrationFee, 2=AcademicBagFee, 3=InstallmentFee, 4=ShipmentFee. Codes 5 and 6 appear
+      in data but are unnamed in YAML — do not invent labels.
+  - name: transferred_accounts
+    type: text
+    nullable: true
+  - name: logistics_order_id
+    type: text
+    nullable: true
+  - name: currency_amount
+    type: double precision
+    nullable: true
+  - name: description
+    type: text
+    nullable: true
+  - name: notes
+    type: text
+    nullable: true
+  - name: installment_payment_details_id
+    type: text
+    nullable: true
+  - name: installment_type
+    type: bigint
+    nullable: true
+  - name: paid_by
+    type: text
+    nullable: true
+- name: org_0101digitall.public_session_master
+  grain:
+  - id
+  columns:
+  - name: id
+    type: text
+    nullable: true
+  - name: code
+    type: text
+    nullable: true
+  - name: name
+    type: text
+    nullable: true
+    description: Human-readable session — always prefer over session_id UUID
+  - name: description
+    type: text
+    nullable: true
+  - name: is_active
+    type: boolean
+    nullable: true
+  - name: start_time
+    type: text
+    nullable: true
+  - name: end_time
+    type: text
+    nullable: true
+  - name: created_by
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamp with time zone
+    nullable: true
+  - name: updated_by
+    type: text
+    nullable: true
+  - name: updated_at
+    type: timestamp with time zone
+    nullable: true
+  - name: sub_description
+    type: text
+    nullable: true
+  - name: section_code
+    type: text
+    nullable: true
+entities:
+- name: AcademicBag
+  synonyms:
+  - bag
+  - fee bag
+  - academic bag
+  - fee package
+  - package
+  base:
+    table: org_0101digitall.public_academic_bag
+  primary_key:
+  - org_0101digitall.public_academic_bag.id
+  default_columns:
+  - learner_name
+  - net_price
+  - bag_payment_status
+  - academic_bag_created_at
+  time_column: org_0101digitall.public_academic_bag.created_at
+  time_grain: second
+  description: Fee bag per enrollment — prices, bag/payment status. Not cash revenue.
+- name: BagItem
+  synonyms:
+  - bag item
+  - fee line
+  - product line item
+  - academic bag item
+  base:
+    table: org_0101digitall.public_academic_bag_items
+  primary_key:
+  - org_0101digitall.public_academic_bag_items.id
+  default_columns:
+  - bag_item_product_name
+  - bag_item_net_price
+  description: Line items inside an academic bag (product + prices).
+- name: BagInstallment
+  synonyms:
+  - installment plan
+  - emi plan
+  - payment plan
+  - instalment
+  - bag installment
+  base:
+    table: org_0101digitall.public_academic_bag_installment
+  primary_key:
+  - org_0101digitall.public_academic_bag_installment.id
+  default_columns:
+  - installment_type
+  - payment_via
+  description: Installment schedule header linked to a bag.
+- name: Payment
+  synonyms:
+  - payment
+  - collection
+  - receipt
+  - transaction
+  - fee paid
+  base:
+    table: org_0101digitall.public_payment_details
+  primary_key:
+  - org_0101digitall.public_payment_details.id
+  default_columns:
+  - learner_name
+  - pay_date
+  - payment_amount
+  - payment_status
+  - payment_mode
+  time_column: org_0101digitall.public_payment_details.pay_date
+  time_grain: second
+  description: Payment transactions. Canonical cash revenue = SUM(amount) with payment_status=3 and INNER
+    JOIN to academic bag.
+- name: LearnerEnrollment
+  synonyms:
+  - enrollment
+  - admission
+  - enrolment
+  - learner enrollment
+  base:
+    table: org_0101digitall.public_learner_enrollment
+  primary_key:
+  - org_0101digitall.public_learner_enrollment.id
+  default_columns:
+  - learner_name
+  - grade_name
+  - curriculum_name
+  - enrollment_date
+  - is_current
+  time_column: org_0101digitall.public_learner_enrollment.enrollment_date
+  time_grain: second
+  description: Enrollment ROWS (not people). Grain = one row per enrollment; one learner can have many
+    enrollments.
+- name: Grade
+  synonyms:
+  - grade
+  - class
+  - standard
+  base:
+    table: org_0101digitall.public_grades_master
+  primary_key:
+  - org_0101digitall.public_grades_master.id
+  label_column: org_0101digitall.public_grades_master.name
+  description: Grade / class lookup.
+- name: Curriculum
+  synonyms:
+  - curriculum
+  - board
+  - programme
+  - program
+  base:
+    table: org_0101digitall.public_curriculum_master
+  primary_key:
+  - org_0101digitall.public_curriculum_master.id
+  label_column: org_0101digitall.public_curriculum_master.name
+  description: Curriculum / board lookup.
+- name: Session
+  synonyms:
+  - session
+  - school session
+  - timing
+  base:
+    table: org_0101digitall.public_session_master
+  primary_key:
+  - org_0101digitall.public_session_master.id
+  label_column: org_0101digitall.public_session_master.name
+  description: Session / timing lookup.
+- name: LogisticsOrder
+  synonyms:
+  - logistics order
+  - shipping order
+  - material order
+  - textbook order
+  - order
+  base:
+    table: org_0101digitall.public_logistics_orders
+  primary_key:
+  - org_0101digitall.public_logistics_orders.id
+  default_columns:
+  - learner_name
+  - order_total_amount
+  - logistics_status
+  - city
+  - logistics_order_created_at
+  time_column: org_0101digitall.public_logistics_orders.created_at
+  time_grain: second
+  description: Logistics / material fulfilment order linked to an enrollment.
+- name: LogisticsOrderItem
+  synonyms:
+  - order item
+  - kit item
+  - book item
+  - logistics item
+  - logistics order item
+  base:
+    table: org_0101digitall.public_logistics_order_items
+  primary_key:
+  - org_0101digitall.public_logistics_order_items.id
+  default_columns:
+  - logistics_order_item_product_name
+  - order_item_net_price
+  - item_status
+  description: Line items on a logistics order (product, qty, net price, item status).
+- name: LogisticsShipment
+  synonyms:
+  - shipment
+  - delivery
+  - dispatch
+  - parcel
+  - consignment
+  - logistics shipment
+  base:
+    table: org_0101digitall.public_logistics_shipments
+  primary_key:
+  - org_0101digitall.public_logistics_shipments.id
+  default_columns:
+  - tracking_id
+  - shipment_status
+  - shipped_at
+  - delivered_at
+  time_column: org_0101digitall.public_logistics_shipments.created_at
+  time_grain: second
+  description: Shipment / delivery record for a logistics order.
+- name: Learner
+  synonyms:
+  - learner
+  - student
+  - pupil
+  - child
+  base:
+    table: org_0101digitall.public_learners
+  primary_key:
+  - org_0101digitall.public_learners.id
+  label_dimension: learner_name
+  group_by_key: true
+  description: Learner / student PEOPLE (one row per person; id is PK). Display with first_name + last_name;
+    NEVER expose id as the learner label.
+- name: State
+  synonyms:
+  - state
+  base:
+    table: org_0101digitall.public_master_list_value
+  primary_key:
+  - org_0101digitall.public_master_list_value.id
+  label_column: org_0101digitall.public_master_list_value.name
+  default_conditions:
+  - is_state
+  description: 'A state: a row of the shared lookup table''s geography list that sits under a country.'
+- name: Country
+  synonyms:
+  - country
+  base:
+    table: org_0101digitall.public_master_list_value
+  primary_key:
+  - org_0101digitall.public_master_list_value.id
+  label_column: org_0101digitall.public_master_list_value.name
+  default_conditions:
+  - is_country
+  description: 'A country: a row of the shared lookup table''s geography list with no parent.'
+- name: AcademicYear
+  synonyms:
+  - academic year
+  - academic session
+  - school year
+  base:
+    table: org_0101digitall.public_academic_years_master
+  primary_key:
+  - org_0101digitall.public_academic_years_master.id
+  label_column: org_0101digitall.public_academic_years_master.name
+  description: An academic year such as 2025-2026; each enrollment belongs to one.
+dimensions:
+- name: bag_payment_status
+  entity: AcademicBag
+  table: org_0101digitall.public_academic_bag
+  column: payment_status
+  type: number
+  synonyms:
+  - payment status
+  values:
+  - stored: 1
+    synonyms:
+    - waiting for payment
+    - awaiting payment
+    - bag waiting for payment
+  - stored: 10
+    synonyms:
+    - installment setup cancelled
+    - bag installment setup cancelled
+  - stored: 11
+    synonyms:
+    - installment setup bounced
+    - installment bounced
+    - bag installment setup bounced
+  - stored: 2
+    synonyms:
+    - payment in progress
+    - bag payment in progress
+  - stored: 3
+    synonyms:
+    - payment completed
+    - bag fully paid
+    - payment completed bag
+    - paid bag
+    - paid bags
+    - bag payment completed
+  - stored: 4
+    synonyms:
+    - payment failed
+    - bag payment failed
+  - stored: 5
+    synonyms:
+    - installment setup pending
+    - installment setup pending (bag)
+    - bag installment setup pending
+  - stored: 6
+    synonyms:
+    - installment setup completed
+    - installment setup completed (bag)
+    - bag installment setup completed
+  - stored: 7
+    synonyms:
+    - installment debited
+    - bag installment debited
+  - stored: 8
+    synonyms:
+    - installment setup active
+    - installment active bag
+    - active installment plan
+    - bag installment setup active
+  - stored: 9
+    synonyms:
+    - installment setup failed
+    - bag installment setup failed
+  description: Bag payment workflow status (integer enum). PaymentCompleted=3 means the bag is fully paid;
+    InstallmentSetupActive=8 means an active installment plan (not the same as is_active).
+- name: bag_status
+  entity: AcademicBag
+  table: org_0101digitall.public_academic_bag
+  column: bag_status
+  type: number
+  synonyms:
+  - bag status
+  values:
+  - stored: 1
+    synonyms:
+    - open
+    - open bag
+  - stored: 2
+    synonyms:
+    - submitted
+    - submitted bag
+  - stored: 3
+    synonyms:
+    - approved
+    - approved bag
+  description: Bag status.
+- name: bag_type
+  entity: AcademicBag
+  table: org_0101digitall.public_academic_bag
+  column: bag_type
+  type: number
+  synonyms:
+  - bag type
+  values:
+  - stored: 1
+    synonyms:
+    - regular
+    - regular bag
+  - stored: 2
+    synonyms:
+    - add on
+    - add-on
+    - addon
+    - add on bag
+    - addon bag
+  description: Bag category / type (integer enum).
+- name: academic_bag_is_active
+  entity: AcademicBag
+  table: org_0101digitall.public_academic_bag
+  column: is_active
+  type: boolean
+  synonyms:
+  - is active
+  values:
+  - stored: true
+    synonyms:
+    - active
+    - currently active
+    - active bag
+  description: Whether the bag is active.
+- name: payment_mode
+  entity: Payment
+  table: org_0101digitall.public_payment_details
+  column: payment_mode
+  type: text
+  synonyms:
+  - payment mode
+  description: How the payment was made (UPI, card, etc.).
+- name: payment_type
+  entity: Payment
+  table: org_0101digitall.public_payment_details
+  column: payment_type
+  type: number
+  synonyms:
+  - payment type
+  - fee type
+  - registration fee
+  - academic bag fee
+  - installment fee
+  - shipment fee
+  values:
+  - stored: 1
+    synonyms:
+    - registration fee
+    - registration
+    - registration fee payment
+  - stored: 2
+    synonyms:
+    - academic bag fee
+    - bag fee
+    - academic bag fee payment
+  - stored: 3
+    synonyms:
+    - installment fee
+    - installment fee payment
+  - stored: 4
+    synonyms:
+    - shipment fee
+    - shipping fee
+    - shipment fee payment
+  description: What the payment is for. Live data also has codes 5 and 6 which are not named in YAML.
+- name: payment_status
+  entity: Payment
+  table: org_0101digitall.public_payment_details
+  column: payment_status
+  type: number
+  synonyms:
+  - payment status
+  - pending payment
+  - failed payment
+  - successful payment
+  values:
+  - stored: 2
+    synonyms:
+    - pending
+    - pending payment
+  - stored: 3
+    synonyms:
+    - successful/collected
+    - paid
+    - successful
+    - collected
+    - successful payment
+  - stored: 4
+    synonyms:
+    - failed
+    - failed payment
+  description: Payment row status on public_payment_details (integer).
+- name: pay_date
+  entity: Payment
+  table: org_0101digitall.public_payment_details
+  column: pay_date
+  type: date
+  synonyms:
+  - pay date
+  description: Payment date.
+  stored_as: timestamptz
+  date_grain: second
+- name: is_current
+  entity: LearnerEnrollment
+  table: org_0101digitall.public_learner_enrollment
+  column: is_current
+  type: boolean
+  synonyms:
+  - is current
+  values:
+  - stored: true
+    synonyms:
+    - current
+    - current enrollment
+  description: Current enrollment flag.
+- name: bag_item_product_name
+  entity: BagItem
+  table: org_0101digitall.public_academic_bag_items
+  column: product_name
+  type: text
+  synonyms:
+  - product name
+  description: Product name on the bag line item.
+- name: installment_type
+  entity: BagInstallment
+  table: org_0101digitall.public_academic_bag_installment
+  column: installment_type
+  type: number
+  synonyms:
+  - installment type
+  - plan type
+  - quarterly
+  - monthly installment
+  - one time full payment
+  values:
+  - stored: 1
+    synonyms:
+    - quarterly
+    - quarterly installment
+  - stored: 2
+    synonyms:
+    - monthly
+    - monthly installment
+  - stored: 3
+    synonyms:
+    - one time full payment
+    - one time
+    - one-time
+    - full payment
+  description: Installment plan schedule type.
+- name: grade_id
+  entity: LearnerEnrollment
+  table: org_0101digitall.public_learner_enrollment
+  column: grade_id
+  type: text
+  synonyms:
+  - grade id
+  description: Enrollment grade FK.
+- name: curriculum_id
+  entity: LearnerEnrollment
+  table: org_0101digitall.public_learner_enrollment
+  column: curriculum_id
+  type: text
+  synonyms:
+  - curriculum id
+  description: Enrollment curriculum FK
+- name: session_id
+  entity: LearnerEnrollment
+  table: org_0101digitall.public_learner_enrollment
+  column: session_id
+  type: text
+  synonyms:
+  - session id
+  description: Enrollment session FK
+- name: logistics_status
+  entity: LogisticsOrder
+  table: org_0101digitall.public_logistics_orders
+  column: logistics_status
+  type: number
+  synonyms:
+  - logistics status
+  - order status
+  - order logistics status
+  - pending payment order
+  - preparing for shipment
+  - partially shipped
+  - partially delivered
+  - ebook requested
+  values:
+  - stored: 1
+    synonyms:
+    - pending
+    - pending order
+    - order pending
+  - stored: 2
+    synonyms:
+    - pending payment
+    - pending payment order
+    - order pending payment
+  - stored: 3
+    synonyms:
+    - preparing for shipment
+    - preparing shipment
+    - order preparing for shipment
+  - stored: 4
+    synonyms:
+    - shipped
+    - order shipped
+  - stored: 5
+    synonyms:
+    - partially shipped
+    - order partially shipped
+  - stored: 6
+    synonyms:
+    - delivered
+    - order delivered
+  - stored: 7
+    synonyms:
+    - partially delivered
+    - order partially delivered
+  - stored: 8
+    synonyms:
+    - ebook requested
+    - e-book requested
+    - order ebook requested
+  description: Order-level logistics status on public_logistics_orders (NOT shipment_status on shipments).
+    Codes 10 and 11 appear in data but are unnamed.
+- name: shipment_fee_status
+  entity: LogisticsOrder
+  table: org_0101digitall.public_logistics_orders
+  column: shipment_fee_status
+  type: number
+  synonyms:
+  - shipment fee status
+  values:
+  - stored: 1
+    synonyms:
+    - pending
+    - fee pending
+  - stored: 2
+    synonyms:
+    - paid
+    - fee paid
+    - shipping fee paid
+  - stored: 3
+    synonyms:
+    - failed
+    - fee failed
+    - shipment fee failed
+  description: Shipment fee status.
+- name: address_verification_status
+  entity: LogisticsOrder
+  table: org_0101digitall.public_logistics_orders
+  column: address_verification_status
+  type: number
+  synonyms:
+  - address verification status
+  values:
+  - stored: 1
+    synonyms:
+    - unverified 2
+    - unverified address
+    - address unverified
+  - stored: 2
+    synonyms:
+    - pending confirmation
+    - address pending confirmation
+  - stored: 3
+    synonyms:
+    - submitted by parent 4
+    - submitted by parent
+    - address submitted by parent
+  - stored: 4
+    synonyms:
+    - verified address
+    - address verified
+  - stored: 5
+    synonyms:
+    - locked
+    - locked address
+    - address locked
+  description: 'How far an order''s delivery address has been checked: unverified, pending confirmation,
+    submitted by parent, verified or locked.'
+- name: logistics_line_type
+  entity: LogisticsOrder
+  table: org_0101digitall.public_logistics_orders
+  column: logistics_line_type
+  type: number
+  synonyms:
+  - logistics line type
+  description: Logistics line type code.
+- name: city
+  entity: LogisticsOrder
+  table: org_0101digitall.public_logistics_orders
+  column: city
+  type: text
+  synonyms:
+  - city
+  - delivery city
+  - city name
+  - order city
+  description: Delivery city NAME on the logistics order (text, not an id).
+- name: logistics_order_is_active
+  entity: LogisticsOrder
+  table: org_0101digitall.public_logistics_orders
+  column: is_active
+  type: boolean
+  synonyms:
+  - is active
+  values:
+  - stored: true
+    synonyms:
+    - active
+    - active order
+  description: Whether the logistics order is active.
+- name: logistics_order_item_product_name
+  entity: LogisticsOrderItem
+  table: org_0101digitall.public_logistics_order_items
+  column: product_name
+  type: text
+  synonyms:
+  - product name
+  description: Product / kit / book name on the line item.
+- name: item_status
+  entity: LogisticsOrderItem
+  table: org_0101digitall.public_logistics_order_items
+  column: item_status
+  type: number
+  synonyms:
+  - item status
+  values:
+  - stored: 1
+    synonyms:
+    - pending 2
+    - pending item
+    - item pending
+  - stored: 2
+    synonyms:
+    - selected item
+    - item selected
+  - stored: 3
+    synonyms:
+    - confirmed 4
+    - confirmed item
+    - item confirmed
+  - stored: 4
+    synonyms:
+    - shipped item
+    - item shipped
+  - stored: 5
+    synonyms:
+    - delivered
+    - delivered item
+    - item delivered
+  description: Item status.
+- name: is_additional_item
+  entity: LogisticsOrderItem
+  table: org_0101digitall.public_logistics_order_items
+  column: is_additional_item
+  type: boolean
+  synonyms:
+  - is additional item
+  values:
+  - stored: false
+    synonyms:
+    - not additional
+    - standard item
+    - regular item
+    - not additional item
+  - stored: true
+    synonyms:
+    - additional item
+    - additional items
+  description: Whether the line item is an additional/addon item.
+- name: shipment_status
+  entity: LogisticsShipment
+  table: org_0101digitall.public_logistics_shipments
+  column: shipment_status
+  type: number
+  synonyms:
+  - shipment status
+  values:
+  - stored: 1
+    synonyms:
+    - shipped
+    - dispatched
+  - stored: 2
+    synonyms:
+    - delivered
+    - delivery completed
+  description: 'Where a shipment is: shipped (dispatched) or delivered.'
+- name: tracking_id
+  entity: LogisticsShipment
+  table: org_0101digitall.public_logistics_shipments
+  column: tracking_id
+  type: text
+  synonyms:
+  - tracking
+  - tracking number
+  - tracking id
+  - courier id
+  description: Carrier / tracking identifier.
+- name: first_name
+  entity: Learner
+  table: org_0101digitall.public_learners
+  column: first_name
+  type: text
+  synonyms:
+  - first name
+  - learner first name
+  description: Learner first / given name.
+- name: last_name
+  entity: Learner
+  table: org_0101digitall.public_learners
+  column: last_name
+  type: text
+  synonyms:
+  - last name
+  - learner last name
+  description: Learner last / family name.
+- name: learner_name
+  entity: Learner
+  expression: NULLIF(TRIM(BOTH FROM CONCAT_WS(' ', org_0101digitall.public_learners.first_name, org_0101digitall.public_learners.last_name)),
+    '')
+  type: text
+  synonyms:
+  - learner name
+  - full name
+  description: Full learner name (first + last).
+- name: enrollment_date
+  entity: LearnerEnrollment
+  table: org_0101digitall.public_learner_enrollment
+  column: enrollment_date
+  type: date
+  synonyms:
+  - enrollment date
+  - enrolled on
+  - date of enrollment
+  description: Date the enrollment was made / recorded.
+  stored_as: timestamptz
+  date_grain: second
+- name: logistics_order_created_at
+  entity: LogisticsOrder
+  table: org_0101digitall.public_logistics_orders
+  column: created_at
+  type: date
+  synonyms:
+  - created
+  - creation date
+  - order date
+  - created on
+  - order created
+  - created at
+  - order created date
+  - order creation date
+  - order created at
+  description: When the logistics order was created.
+  stored_as: timestamptz
+  date_grain: second
+- name: shipped_at
+  entity: LogisticsShipment
+  table: org_0101digitall.public_logistics_shipments
+  column: shipped_at
+  type: date
+  synonyms:
+  - shipped date
+  - ship date
+  - dispatch date
+  - shipped on
+  - when shipped
+  - shipped at
+  description: When the shipment was dispatched / marked shipped.
+  stored_as: timestamptz
+  date_grain: second
+- name: delivered_at
+  entity: LogisticsShipment
+  table: org_0101digitall.public_logistics_shipments
+  column: delivered_at
+  type: date
+  synonyms:
+  - delivered date
+  - delivery date
+  - delivered on
+  - when delivered
+  - delivered at
+  description: When the shipment was delivered.
+  stored_as: timestamptz
+  date_grain: second
+- name: logistics_shipment_created_at
+  entity: LogisticsShipment
+  table: org_0101digitall.public_logistics_shipments
+  column: created_at
+  type: date
+  synonyms:
+  - shipment created
+  - created at
+  - creation date
+  description: When the shipment row was created.
+  stored_as: timestamptz
+  date_grain: second
+- name: discount_type
+  entity: BagItem
+  table: org_0101digitall.public_academic_bag_items
+  column: discount_type
+  type: number
+  synonyms:
+  - discount type
+  values:
+  - stored: 1
+    synonyms:
+    - percentage
+    - percentage discount
+    - percent off
+    - percent discount
+  - stored: 2
+    synonyms:
+    - absolute
+    - absolute discount
+    - flat discount
+  - stored: null
+    synonyms:
+    - no discount
+    - undiscounted
+  description: How discount_value is interpreted on the line item. Never treat discount_value as a currency
+    amount when discount_type=1, or as a percent when discount_type=2.
+- name: discount_value
+  entity: BagItem
+  table: org_0101digitall.public_academic_bag_items
+  column: discount_value
+  type: number
+  synonyms:
+  - discount value
+  description: Raw discount magnitude — meaning depends on discount_type. Discount amount = CASE discount_type
+    WHEN 1 THEN gross_price*discount_value/100 WHEN 2 THEN discount_value ELSE 0 END.
+- name: discount_name
+  entity: BagItem
+  table: org_0101digitall.public_academic_bag_items
+  column: discount_name
+  type: text
+  synonyms:
+  - discount name
+  description: Optional label/name of the discount applied to the line item.
+- name: is_mandatory
+  entity: BagItem
+  table: org_0101digitall.public_academic_bag_items
+  column: is_mandatory
+  type: boolean
+  synonyms:
+  - mandatory
+  - required
+  - compulsory
+  - is mandatory
+  values:
+  - stored: false
+    synonyms:
+    - optional item
+    - non-mandatory
+  - stored: true
+    synonyms:
+    - mandatory
+    - required item
+    - compulsory
+    - mandatory item
+  description: TRUE if this product line is mandatory in the bag and cannot be removed; FALSE if optional.
+- name: bag_item_is_active
+  entity: BagItem
+  table: org_0101digitall.public_academic_bag_items
+  column: is_active
+  type: boolean
+  synonyms:
+  - active item
+  - active line
+  - is active
+  values:
+  - stored: false
+    synonyms:
+    - inactive item
+    - inactive line
+    - inactive bag item
+  - stored: true
+    synonyms:
+    - active item
+    - active line
+    - active items
+    - active bag item
+  description: TRUE if this bag line-item row is currently active; FALSE if inactive.
+- name: payment_via
+  entity: BagInstallment
+  table: org_0101digitall.public_academic_bag_installment
+  column: payment_via
+  type: number
+  synonyms:
+  - payment via
+  - payment channel
+  - payment gateway
+  - paid via
+  - jodo
+  - razorpay
+  - paypal
+  values:
+  - stored: 1
+    synonyms:
+    - jodoinstallment
+    - jodo
+    - jodo installment
+    - via jodo installment
+  - stored: 2
+    synonyms:
+    - razorpay one time
+    - via razorpay one time
+  - stored: 3
+    synonyms:
+    - razorpay installment
+    - via razorpay installment
+  - stored: 4
+    synonyms:
+    - paypal one time
+    - via paypal one time
+  - stored: 5
+    synonyms:
+    - paypal installment
+    - via paypal installment
+  - stored: 6
+    synonyms:
+    - razorpay direct one time
+    - via razorpay direct one time
+  - stored: 7
+    synonyms:
+    - razorpay direct installment
+    - via razorpay direct installment
+  - stored: null
+    synonyms:
+    - no gateway
+    - gateway not set
+    - payment via not set
+  description: Payment gateway / channel on the installment header. Column is on public_academic_bag_installment
+    (not academic_bag).
+- name: currency
+  entity: Payment
+  table: org_0101digitall.public_payment_details
+  column: currency
+  type: text
+  synonyms:
+  - currency code
+  - INR
+  - USD
+  - currency
+  values:
+  - stored: INR
+    synonyms:
+    - INR
+    - rupees
+    - Indian rupee
+    - inr payment
+  - stored: USD
+    synonyms:
+    - USD
+    - dollars
+    - US dollar
+    - usd payment
+  description: ISO-style currency code of the payment amount (e.g. INR, USD). Do not SUM amounts across
+    currencies without grouping or filtering by currency.
+- name: is_rollover
+  entity: LearnerEnrollment
+  table: org_0101digitall.public_learner_enrollment
+  column: is_rollover
+  type: boolean
+  synonyms:
+  - rollover
+  - rollover enrollment
+  - new admission
+  - is rollover
+  values:
+  - stored: false
+    synonyms:
+    - new admission
+    - non-rollover
+    - new admission enrollment
+  - stored: true
+    synonyms:
+    - rollover
+    - rollover enrollment
+  description: TRUE if this enrollment was created via rollover; FALSE if new admission.
+- name: enrollment_progress_step
+  entity: LearnerEnrollment
+  table: org_0101digitall.public_learner_enrollment
+  column: enrollment_progress_step
+  type: number
+  synonyms:
+  - progress status
+  - enrollment stage
+  - enrollment progress
+  - progress step
+  - payment pending enrollment
+  - admission completed
+  - enrollment progress step
+  values:
+  - stored: 1
+    synonyms:
+    - enrollment completed 2
+    - enrollment completed
+  - stored: 10
+    synonyms:
+    - academic bag created
+    - enrollment academic bag created
+  - stored: 11
+    synonyms:
+    - payment pending 12
+    - enrollment payment pending
+    - payment pending enrollment
+  - stored: 12
+    synonyms:
+    - installment setup pending enrollment
+    - enrollment installment setup pending
+  - stored: 13
+    synonyms:
+    - installment setup completed 14
+    - installment setup completed enrollment
+    - enrollment installment setup completed
+  - stored: 14
+    synonyms:
+    - installment active enrollment
+    - enrollment installment active
+  - stored: 15
+    synonyms:
+    - installment inactive 16
+    - installment inactive enrollment
+    - enrollment installment inactive
+  - stored: 16
+    synonyms:
+    - installment completed enrollment
+    - enrollment installment completed
+  - stored: 17
+    synonyms:
+    - installment failed 18
+    - installment failed enrollment
+    - enrollment installment failed
+  - stored: 18
+    synonyms:
+    - enrollment payment completed
+  - stored: 19
+    synonyms:
+    - document verification pending 20
+    - document verification pending
+    - enrollment document verification pending
+  - stored: 2
+    synonyms:
+    - test scheduled
+    - enrollment test scheduled
+  - stored: 20
+    synonyms:
+    - document verified
+    - enrollment document verified
+  - stored: 21
+    synonyms:
+    - admission completed 22
+    - admission completed
+    - enrollment admission completed
+  - stored: 22
+    synonyms:
+    - installment initiated failed
+    - enrollment installment initiated failed
+  - stored: 3
+    synonyms:
+    - test completed 4
+    - test completed
+    - enrollment test completed
+  - stored: 4
+    synonyms:
+    - test failed
+    - enrollment test failed
+  - stored: 5
+    synonyms:
+    - test skipped 6
+    - test skipped
+    - enrollment test skipped
+  - stored: 6
+    synonyms:
+    - academic bag in progress
+    - enrollment academic bag in progress
+  - stored: 7
+    synonyms:
+    - tier selected 8
+    - tier selected
+    - enrollment tier selected
+  - stored: 8
+    synonyms:
+    - tier skipped
+    - enrollment tier skipped
+  - stored: 9
+    synonyms:
+    - session selected 10
+    - session selected
+    - enrollment session selected
+  description: Enrollment pipeline stage (NOT payment_details.payment_status and NOT academic_bag.payment_status).
+- name: academic_bag_created_at
+  entity: AcademicBag
+  table: org_0101digitall.public_academic_bag
+  column: created_at
+  type: date
+  synonyms:
+  - created
+  - creation date
+  - created on
+  - created at
+  - bag created
+  - bag created date
+  - bag creation date
+  - bag created at
+  description: When the bag row was created.
+  stored_as: timestamptz
+  date_grain: second
+- name: net_price
+  entity: AcademicBag
+  table: org_0101digitall.public_academic_bag
+  column: net_price
+  type: number
+  synonyms:
+  - net price
+  - bag net price
+  - net fee
+  - after discount price
+  description: Per-bag net price after discount.
+- name: payment_month
+  entity: Payment
+  expression: DATE_TRUNC('month', org_0101digitall.public_payment_details.pay_date AT TIME ZONE 'Asia/Kolkata')::date
+  type: date
+  synonyms:
+  - month
+  - monthly
+  - each month
+  - payment month
+  description: Calendar month of pay_date, truncated and cast to date.
+  stored_as: date
+  date_grain: month
+- name: bag_value_band
+  entity: AcademicBag
+  expression: CASE WHEN org_0101digitall.public_academic_bag.net_price >= 100000 THEN 'high' WHEN org_0101digitall.public_academic_bag.net_price
+    >= 50000 THEN 'medium' WHEN org_0101digitall.public_academic_bag.net_price IS NOT NULL THEN 'low'
+    END
+  type: text
+  synonyms:
+  - high medium or low
+  - value
+  - value band
+  - bag value band
+  description: High/medium/low band on bag net price; empty prices get no band.
+- name: order_total_amount
+  entity: LogisticsOrder
+  table: org_0101digitall.public_logistics_orders
+  column: total_amount
+  type: number
+  synonyms:
+  - total amount
+  - order amount
+  - order total
+  - order total amount
+  description: Per-order total amount (row-level).
+- name: bag_item_net_price
+  entity: BagItem
+  table: org_0101digitall.public_academic_bag_items
+  column: net_price
+  type: number
+  synonyms:
+  - item net price
+  - line item net price
+  - bag item net price
+  description: Per-line-item net price (row-level).
+- name: order_item_net_price
+  entity: LogisticsOrderItem
+  table: org_0101digitall.public_logistics_order_items
+  column: net_price
+  type: number
+  synonyms:
+  - order item net price
+  - line item net price
+  description: Per-line-item net price (row-level) on a logistics order.
+- name: payment_learner_id
+  entity: Payment
+  expression: COALESCE((SELECT ab.learner_id FROM org_0101digitall.public_academic_bag ab WHERE ab.id
+    = org_0101digitall.public_payment_details.academic_bag_id), (SELECT le.learner_id FROM org_0101digitall.public_learner_enrollment
+    le WHERE le.id = org_0101digitall.public_payment_details.learner_enroll_id))
+  type: text
+  synonyms:
+  - payment learner
+  - learner id
+  - payment learner id
+  description: The learner a payment belongs to. A payment links to its learner through its academic bag
+    OR its enrollment (either FK can be null), so this checks both.
+- name: enrollment_learner_id
+  entity: LearnerEnrollment
+  table: org_0101digitall.public_learner_enrollment
+  column: learner_id
+  type: text
+  synonyms:
+  - enrollment learner
+  - learner id
+  - enrollment learner id
+  description: The learner an enrollment belongs to (raw id).
+- name: grade_name
+  entity: Grade
+  table: org_0101digitall.public_grades_master
+  column: name
+  type: text
+  synonyms:
+  - grade
+  - bag grade
+  - item grade
+  - order grade
+  values:
+  - stored:
+    - KG 1
+    - KG 2
+    synonyms:
+    - Kindergarten
+  description: Name of the grade (school year level), such as KG 1 or Grade 3.
+- name: curriculum_name
+  entity: Curriculum
+  table: org_0101digitall.public_curriculum_master
+  column: name
+  type: text
+  synonyms:
+  - curriculum
+  description: Name of the curriculum (the programme of study).
+- name: session_name
+  entity: Session
+  table: org_0101digitall.public_session_master
+  column: name
+  type: text
+  synonyms:
+  - session
+  description: Name of the session (the time of day a learner attends), such as Morning.
+- name: state_name
+  entity: State
+  table: org_0101digitall.public_master_list_value
+  column: name
+  type: text
+  synonyms:
+  - state
+  - state name
+  - province
+  - region
+  parent: country_name
+  description: Name of the state.
+- name: country_name
+  entity: Country
+  table: org_0101digitall.public_master_list_value
+  column: name
+  type: text
+  synonyms:
+  - country
+  - country name
+  - nation
+  description: Name of the country.
+- name: order_id
+  entity: LogisticsOrder
+  table: org_0101digitall.public_logistics_orders
+  column: id
+  type: text
+  synonyms:
+  - order id
+  - order number
+  - which order
+  description: Identifier of a logistics order.
+- name: logistics_order_item_is_active
+  entity: LogisticsOrderItem
+  table: org_0101digitall.public_logistics_order_items
+  column: is_active
+  type: boolean
+  synonyms:
+  - is active
+  values:
+  - stored: true
+    synonyms:
+    - active item
+  description: Whether an order item is marked active.
+- name: logistics_shipment_is_active
+  entity: LogisticsShipment
+  table: org_0101digitall.public_logistics_shipments
+  column: is_active
+  type: boolean
+  synonyms:
+  - is active
+  values:
+  - stored: true
+    synonyms:
+    - active shipment
+  description: Whether a shipment is marked active.
+- name: payment_amount
+  entity: Payment
+  table: org_0101digitall.public_payment_details
+  column: amount
+  type: number
+  description: Amount of one payment, in its own currency.
+- name: academic_year_name
+  entity: AcademicYear
+  table: org_0101digitall.public_academic_years_master
+  column: name
+  type: text
+  values:
+  - stored: 2025-2026
+    synonyms:
+    - 2025-2026
+    - 2025-26
+  - stored: 2026-2027
+    synonyms:
+    - 2026-2027
+    - 2026-27
+  description: Academic year name.
+- name: order_value_band
+  entity: LogisticsOrder
+  type: text
+  synonyms:
+  - value band
+  - high medium or low
+  - order value band
+  expression: CASE WHEN org_0101digitall.public_logistics_orders.total_amount >= 7000 THEN 'high' WHEN
+    org_0101digitall.public_logistics_orders.total_amount >= 3000 THEN 'medium' WHEN org_0101digitall.public_logistics_orders.total_amount
+    IS NOT NULL THEN 'low' END
+  description: High/medium/low band on order total amount; empty amounts get no band.
+measures:
+- name: total_collections
+  entity: Payment
+  sql: org_0101digitall.public_payment_details.amount::numeric
+  agg: sum
+  recorded_per:
+  - org_0101digitall.public_payment_details.id
+  synonyms:
+  - payment amount
+  - amount collected
+  - payment collections
+  - total collections
+  description: Cash collected - SUM(payment_details.amount).
+- name: avg_payment
+  entity: Payment
+  sql: org_0101digitall.public_payment_details.amount::numeric
+  agg: avg
+  recorded_per:
+  - org_0101digitall.public_payment_details.id
+  synonyms:
+  - average payment
+  - avg collection
+  - average revenue
+  - avg revenue
+  - mean revenue
+  - average fees collected
+  - avg payment
+  description: Average payment amount (AVG of cash received).
+- name: payment_count
+  entity: Payment
+  sql: org_0101digitall.public_payment_details.id
+  agg: count
+  recorded_per:
+  - org_0101digitall.public_payment_details.id
+  synonyms:
+  - payments
+  - transactions
+  - number of payments
+  - payment count
+  description: Number of payment rows.
+- name: total_bag_net_value
+  entity: AcademicBag
+  sql: org_0101digitall.public_academic_bag.net_price::numeric
+  agg: sum
+  recorded_per:
+  - org_0101digitall.public_academic_bag.id
+  synonyms:
+  - bag value
+  - net fee value
+  - booked fees
+  - fee commitment
+  - net price
+  - bag net price
+  - bag revenue
+  - total bag net value
+  description: Sum of bag net_price (booked fee value, not cash).
+- name: avg_bag_net_value
+  entity: AcademicBag
+  sql: org_0101digitall.public_academic_bag.net_price::numeric
+  agg: avg
+  recorded_per:
+  - org_0101digitall.public_academic_bag.id
+  synonyms:
+  - average bag value
+  - avg fee
+  - avg bag net value
+  description: Average bag net_price over bags that have one. Bags with no price are excluded, not counted
+    as zero.
+- name: bag_count
+  entity: AcademicBag
+  sql: org_0101digitall.public_academic_bag.id
+  agg: count
+  recorded_per:
+  - org_0101digitall.public_academic_bag.id
+  synonyms:
+  - bags
+  - number of bags
+  - fee bags
+  - academic bags
+  - bag count
+  description: Number of academic bags.
+- name: total_gst
+  entity: AcademicBag
+  sql: org_0101digitall.public_academic_bag.gst_total::numeric
+  agg: sum
+  recorded_per:
+  - org_0101digitall.public_academic_bag.id
+  synonyms:
+  - gst
+  - tax
+  - gst total
+  - total gst
+  description: Sum of GST on bags.
+- name: total_gross
+  entity: AcademicBag
+  sql: org_0101digitall.public_academic_bag.gross_price::numeric
+  agg: sum
+  recorded_per:
+  - org_0101digitall.public_academic_bag.id
+  synonyms:
+  - gross fees
+  - gross value
+  - total gross
+  description: Sum of bag gross_price.
+- name: bag_item_net_total
+  entity: BagItem
+  sql: org_0101digitall.public_academic_bag_items.net_price::numeric
+  agg: sum
+  recorded_per:
+  - org_0101digitall.public_academic_bag_items.id
+  synonyms:
+  - item revenue
+  - product fees
+  - bag item net total
+  description: Sum of bag-item net_price (booked line value AFTER discount).
+- name: bag_item_count
+  entity: BagItem
+  sql: org_0101digitall.public_academic_bag_items.academic_bag_id
+  agg: count
+  recorded_per:
+  - org_0101digitall.public_academic_bag_items.id
+  synonyms:
+  - bag items
+  - bag item count
+  description: Number of bag line items.
+- name: enrollment_count
+  entity: LearnerEnrollment
+  sql: org_0101digitall.public_learner_enrollment.id
+  agg: count
+  recorded_per:
+  - org_0101digitall.public_learner_enrollment.id
+  synonyms:
+  - enrollments
+  - admissions
+  - number of enrollments
+  - enrollment count
+  - admission count
+  description: Number of enrollment ROWS (not people). One learner can have multiple enrollments.
+- name: installment_plan_count
+  entity: BagInstallment
+  sql: org_0101digitall.public_academic_bag_installment.id
+  agg: count
+  recorded_per:
+  - org_0101digitall.public_academic_bag_installment.id
+  synonyms:
+  - installment plans
+  - emi plans
+  - installment plan count
+  description: Number of installment plan headers.
+- name: order_count
+  entity: LogisticsOrder
+  sql: org_0101digitall.public_logistics_orders.id
+  agg: count
+  recorded_per:
+  - org_0101digitall.public_logistics_orders.id
+  synonyms:
+  - orders
+  - number of orders
+  - logistics orders
+  - shipping orders
+  - order count
+  description: Number of logistics orders.
+- name: total_order_amount
+  entity: LogisticsOrder
+  sql: org_0101digitall.public_logistics_orders.total_amount
+  agg: sum
+  recorded_per:
+  - org_0101digitall.public_logistics_orders.id
+  synonyms:
+  - total order amount
+  - sum of order amounts
+  - total order value
+  - sum of logistics order amounts
+  description: Sum of ALL logistics order total_amount values (grand total).
+- name: avg_order_amount
+  entity: LogisticsOrder
+  sql: org_0101digitall.public_logistics_orders.total_amount
+  agg: avg
+  recorded_per:
+  - org_0101digitall.public_logistics_orders.id
+  synonyms:
+  - average order value
+  - avg order amount
+  - average order total
+  description: Average logistics order total_amount over orders that have one. Orders with no amount are
+    excluded, not counted as zero.
+- name: total_shipment_fee
+  entity: LogisticsOrder
+  sql: org_0101digitall.public_logistics_orders.shipment_fee_amount
+  agg: sum
+  recorded_per:
+  - org_0101digitall.public_logistics_orders.id
+  synonyms:
+  - total shipping fee
+  - sum of shipment fees
+  - total delivery fees
+  - total shipment fee
+  description: Sum of ALL shipment fees on logistics orders.
+- name: order_item_count
+  entity: LogisticsOrderItem
+  sql: org_0101digitall.public_logistics_order_items.id
+  agg: count
+  recorded_per:
+  - org_0101digitall.public_logistics_order_items.id
+  synonyms:
+  - order items
+  - kit items
+  - order item count
+  description: Number of logistics order line items.
+- name: order_item_net_total
+  entity: LogisticsOrderItem
+  sql: org_0101digitall.public_logistics_order_items.net_price
+  agg: sum
+  recorded_per:
+  - org_0101digitall.public_logistics_order_items.id
+  synonyms:
+  - item value
+  - item net total
+  - order item net total
+  description: Sum of logistics item net_price.
+- name: item_quantity_total
+  entity: LogisticsOrderItem
+  sql: org_0101digitall.public_logistics_order_items.quantity
+  agg: sum
+  recorded_per:
+  - org_0101digitall.public_logistics_order_items.id
+  synonyms:
+  - total quantity
+  - units shipped
+  - item qty
+  - item quantity total
+  description: Sum of item quantities.
+- name: shipment_count
+  entity: LogisticsShipment
+  sql: org_0101digitall.public_logistics_shipments.id
+  agg: count
+  recorded_per:
+  - org_0101digitall.public_logistics_shipments.id
+  synonyms:
+  - shipments
+  - deliveries
+  - number of shipments
+  - dispatches
+  - shipment count
+  description: Number of shipments.
+- name: learner_count
+  entity: Learner
+  sql: org_0101digitall.public_learners.id
+  agg: count
+  recorded_per:
+  - org_0101digitall.public_learners.id
+  synonyms:
+  - learners
+  - students
+  - headcount
+  - number of learners
+  - how many learners
+  - learner count
+  - student count
+  - learners present
+  description: Number of learners / students (people). public_learners.id is the PK — COUNT(id) is enough,
+    no DISTINCT needed.
+- name: max_order_amount
+  entity: LogisticsOrder
+  sql: org_0101digitall.public_logistics_orders.total_amount
+  agg: max
+  recorded_per:
+  - org_0101digitall.public_logistics_orders.id
+  synonyms:
+  - highest amount
+  - maximum amount
+  - max order amount
+  - highest order amount
+  - highest order value
+  - maximum order value
+  - largest order amount
+  description: Highest single logistics order total_amount (MAX).
+- name: min_order_amount
+  entity: LogisticsOrder
+  sql: org_0101digitall.public_logistics_orders.total_amount
+  agg: min
+  recorded_per:
+  - org_0101digitall.public_logistics_orders.id
+  synonyms:
+  - lowest amount
+  - minimum amount
+  - min order amount
+  - lowest order amount
+  - lowest order value
+  - minimum order value
+  - least amount
+  - smallest order amount
+  description: Lowest single logistics order total_amount (MIN).
+- name: max_shipment_fee
+  entity: LogisticsOrder
+  sql: org_0101digitall.public_logistics_orders.shipment_fee_amount
+  agg: max
+  recorded_per:
+  - org_0101digitall.public_logistics_orders.id
+  synonyms:
+  - highest shipment fee
+  - maximum shipment fee
+  - max shipping fee
+  - highest shipping fee
+  - largest shipment fee
+  - max shipment fee
+  description: Highest single shipment_fee_amount (MAX).
+- name: min_shipment_fee
+  entity: LogisticsOrder
+  sql: org_0101digitall.public_logistics_orders.shipment_fee_amount
+  agg: min
+  recorded_per:
+  - org_0101digitall.public_logistics_orders.id
+  synonyms:
+  - lowest shipment fee
+  - minimum shipment fee
+  - min shipping fee
+  - lowest shipping fee
+  - least shipment fee
+  - min shipment fee
+  description: Lowest single shipment_fee_amount (MIN).
+- name: item_discount_total
+  entity: BagItem
+  sql: CASE org_0101digitall.public_academic_bag_items.discount_type::integer WHEN 1 THEN COALESCE(org_0101digitall.public_academic_bag_items.gross_price::numeric,
+    0) * COALESCE(org_0101digitall.public_academic_bag_items.discount_value::numeric, 0) / 100.0 WHEN
+    2 THEN COALESCE(org_0101digitall.public_academic_bag_items.discount_value::numeric, 0) ELSE 0 END
+  agg: sum
+  recorded_per:
+  - org_0101digitall.public_academic_bag_items.id
+  synonyms:
+  - discount amount
+  - total discount
+  - discounts given
+  - line discount
+  - item discount total
+  description: Total discount amount on bag line items. Interprets discount_value by discount_type.
+- name: avg_shipment_fee
+  entity: LogisticsOrder
+  sql: org_0101digitall.public_logistics_orders.shipment_fee_amount
+  agg: avg
+  recorded_per:
+  - org_0101digitall.public_logistics_orders.id
+  synonyms:
+  - average shipment fee
+  - avg shipment fee
+  - mean shipping fee
+  - average delivery fee
+  - average shipping cost
+  description: Average shipment_fee_amount over orders that have a fee.
+- name: total_revenue
+  entity: Payment
+  sql: CASE WHEN org_0101digitall.public_payment_details.payment_status::integer = 3 AND EXISTS (SELECT
+    1 FROM org_0101digitall.public_academic_bag AS req WHERE org_0101digitall.public_payment_details.academic_bag_id
+    = req.id) THEN org_0101digitall.public_payment_details.amount::numeric END
+  agg: sum
+  recorded_per:
+  - org_0101digitall.public_payment_details.id
+  synonyms:
+  - revenue
+  - fees collected
+  - collections
+  - income
+  - sales
+  - cash received
+  - total revenue
+  description: Cash collected — SUM(payment_details.amount).
+- name: avg_days_to_deliver
+  entity: LogisticsShipment
+  sql: EXTRACT(EPOCH FROM (org_0101digitall.public_logistics_shipments.delivered_at - org_0101digitall.public_logistics_shipments.shipped_at))
+    / 86400.0
+  agg: avg
+  recorded_per:
+  - org_0101digitall.public_logistics_shipments.id
+  synonyms:
+  - average delivery time
+  - days to deliver
+  - delivery duration
+  - average shipping time
+  - time to deliver
+  - shipping days
+  - average days between shipped and delivered
+  - avg days to deliver
+  unit: days
+  description: Average days from shipped_at to delivered_at, over shipments that have both.
+- name: selected_quantity_total
+  entity: BagItem
+  sql: COALESCE(org_0101digitall.public_academic_bag_items.selected_qty, org_0101digitall.public_academic_bag_items.quantity,
+    0)
+  agg: sum
+  recorded_per:
+  - org_0101digitall.public_academic_bag_items.id
+  synonyms:
+  - selected quantity
+  - total selected quantity
+  - quantity selected
+  - selected quantity total
+  description: Sum of selected bag-item quantities, falling back to quantity when selected_qty is null.
+- name: first_payment_date
+  entity: Payment
+  sql: org_0101digitall.public_payment_details.pay_date
+  agg: min
+  recorded_per:
+  - org_0101digitall.public_payment_details.id
+  synonyms:
+  - first payment date
+  description: Date of the earliest payment.
+- name: first_enrollment_date
+  entity: LearnerEnrollment
+  sql: org_0101digitall.public_learner_enrollment.enrollment_date
+  agg: min
+  recorded_per:
+  - org_0101digitall.public_learner_enrollment.id
+  synonyms:
+  - first enrollment date
+  description: Date of the earliest enrollment.
+- name: days_to_first_payment
+  entity: Learner
+  formula: first_payment_date - first_enrollment_date
+  per_record: true
+  unit: days
+  synonyms:
+  - days to first payment
+  - days between enrollment and first payment
+  description: Calendar days from the first enrollment to the first payment.
+- name: outstanding
+  entity: Learner
+  formula: total_bag_net_value - total_revenue
+  per_record: true
+  synonyms:
+  - outstanding
+  - amount outstanding
+  - balance due
+  description: Bag value billed minus revenue collected.
+- name: collection_rate
+  entity: Learner
+  formula: total_revenue / total_bag_net_value
+  synonyms:
+  - collection rate
+  description: Revenue collected as a share of bag value billed.
+relationships:
+- name: academic_bag_to_learner_enrollment
+  from: AcademicBag
+  to: LearnerEnrollment
+  'on': org_0101digitall.public_academic_bag.enrollment_id = org_0101digitall.public_learner_enrollment.id
+  join_type: inner
+  cardinality: many_to_one
+- name: bag_item_to_academic_bag
+  from: BagItem
+  to: AcademicBag
+  'on': org_0101digitall.public_academic_bag_items.academic_bag_id = org_0101digitall.public_academic_bag.id
+  join_type: inner
+  cardinality: many_to_one
+- name: bag_installment_to_academic_bag
+  from: BagInstallment
+  to: AcademicBag
+  'on': org_0101digitall.public_academic_bag_installment.academic_bag_id = org_0101digitall.public_academic_bag.id
+  join_type: inner
+  cardinality: many_to_one
+- name: payment_to_academic_bag
+  from: Payment
+  to: AcademicBag
+  'on': org_0101digitall.public_payment_details.academic_bag_id = org_0101digitall.public_academic_bag.id
+  join_type: left
+  cardinality: many_to_one
+- name: payment_to_learner_enrollment
+  from: Payment
+  to: LearnerEnrollment
+  'on': org_0101digitall.public_payment_details.learner_enroll_id = org_0101digitall.public_learner_enrollment.id
+  join_type: left
+  cardinality: many_to_one
+- name: learner_enrollment_to_grade
+  from: LearnerEnrollment
+  to: Grade
+  'on': org_0101digitall.public_learner_enrollment.grade_id = org_0101digitall.public_grades_master.id
+  join_type: left
+  cardinality: many_to_one
+- name: learner_enrollment_to_curriculum
+  from: LearnerEnrollment
+  to: Curriculum
+  'on': org_0101digitall.public_learner_enrollment.curriculum_id = org_0101digitall.public_curriculum_master.id
+  join_type: left
+  cardinality: many_to_one
+- name: learner_enrollment_to_session
+  from: LearnerEnrollment
+  to: Session
+  'on': org_0101digitall.public_learner_enrollment.session_id = org_0101digitall.public_session_master.id
+  join_type: left
+  cardinality: many_to_one
+- name: logistics_order_to_learner_enrollment
+  from: LogisticsOrder
+  to: LearnerEnrollment
+  'on': org_0101digitall.public_logistics_orders.enrollment_id = org_0101digitall.public_learner_enrollment.id
+  join_type: inner
+  cardinality: many_to_one
+- name: logistics_order_item_to_logistics_order
+  from: LogisticsOrderItem
+  to: LogisticsOrder
+  'on': org_0101digitall.public_logistics_order_items.logistics_order_id = org_0101digitall.public_logistics_orders.id
+  join_type: inner
+  cardinality: many_to_one
+- name: logistics_shipment_to_logistics_order
+  from: LogisticsShipment
+  to: LogisticsOrder
+  'on': org_0101digitall.public_logistics_shipments.logistics_order_id = org_0101digitall.public_logistics_orders.id
+  join_type: inner
+  cardinality: many_to_one
+- name: logistics_order_item_to_logistics_shipment
+  from: LogisticsOrderItem
+  to: LogisticsShipment
+  'on': org_0101digitall.public_logistics_order_items.logistics_shipment_id = org_0101digitall.public_logistics_shipments.id
+  join_type: left
+  cardinality: many_to_one
+- name: academic_bag_to_learner
+  from: AcademicBag
+  to: Learner
+  'on': org_0101digitall.public_academic_bag.learner_id = org_0101digitall.public_learners.id
+  join_type: inner
+  cardinality: many_to_one
+- name: learner_enrollment_to_learner
+  from: LearnerEnrollment
+  to: Learner
+  'on': org_0101digitall.public_learner_enrollment.learner_id = org_0101digitall.public_learners.id
+  join_type: inner
+  cardinality: many_to_one
+- name: logistics_order_to_state
+  from: LogisticsOrder
+  to: State
+  'on': org_0101digitall.public_logistics_orders.state_id = org_0101digitall.public_master_list_value.id
+  join_type: left
+  cardinality: many_to_one
+- name: logistics_order_to_country
+  from: LogisticsOrder
+  to: Country
+  'on': org_0101digitall.public_logistics_orders.country_id = org_0101digitall.public_master_list_value.id
+  join_type: left
+  cardinality: many_to_one
+- name: payment_to_learner
+  from: Payment
+  to: Learner
+  'on': COALESCE((SELECT ab.learner_id FROM org_0101digitall.public_academic_bag ab WHERE ab.id = org_0101digitall.public_payment_details.academic_bag_id),
+    (SELECT le.learner_id FROM org_0101digitall.public_learner_enrollment le WHERE le.id = org_0101digitall.public_payment_details.learner_enroll_id))
+    = org_0101digitall.public_learners.id
+  join_type: left
+  cardinality: many_to_one
+  preferred: true
+  description: 'The payment''s learner: through its bag, or through its enrollment when it has no bag.'
+- name: learner_enrollment_to_academic_year
+  from: LearnerEnrollment
+  to: AcademicYear
+  'on': org_0101digitall.public_learner_enrollment.academic_year_id = org_0101digitall.public_academic_years_master.id
+  join_type: left
+  cardinality: many_to_one
+- name: state_to_country
+  from: State
+  to: Country
+  'on': org_0101digitall.public_master_list_value.parent_value_id = org_0101digitall.public_master_list_value.id
+  join_type: left
+  cardinality: many_to_one
+  description: 'Same table on both sides: the left of = is the state, the right the country.'
+conditions:
+- name: active_installment_plan
+  scope: BagInstallment
+  sql: org_0101digitall.public_academic_bag_installment.is_active = TRUE AND COALESCE(org_0101digitall.public_academic_bag_installment.is_draft,
+    FALSE) = FALSE
+  polarity: include
+  synonyms:
+  - active installment plan
+  description: Active non-draft installment plans.
+- name: missing_tracking_id
+  scope: LogisticsShipment
+  sql: (org_0101digitall.public_logistics_shipments.tracking_id IS NULL OR org_0101digitall.public_logistics_shipments.tracking_id
+    = '')
+  polarity: include
+  synonyms:
+  - missing tracking
+  - no tracking
+  - no tracking id
+  - tracking missing
+  - tracking ids missing
+  - blank tracking
+  - without tracking id
+  - missing tracking id
+  description: Shipments with no tracking ID (NULL or blank).
+- name: is_state
+  scope: State
+  polarity: include
+  sql: org_0101digitall.public_master_list_value.list_id = 'be0ac7ab-ff1b-4916-8281-3933582ff2d4' AND
+    org_0101digitall.public_master_list_value.parent_value_id IS NOT NULL
+  description: 'Rows of the shared lookup table that are states: in the geography list, under a country.'
+- name: is_country
+  scope: Country
+  polarity: include
+  sql: org_0101digitall.public_master_list_value.list_id = 'be0ac7ab-ff1b-4916-8281-3933582ff2d4' AND
+    org_0101digitall.public_master_list_value.parent_value_id IS NULL
+  description: 'Rows of the shared lookup table that are countries: in the geography list, with no parent.'
+ontology: []

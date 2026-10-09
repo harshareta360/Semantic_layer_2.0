@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "semantic-layer"
+version = "0.1.0"
+description = "Deterministic Normalization + Intent Engine (intent-v1)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "pydantic>=2.6",
+  "PyYAML>=6.0",
+  "rapidfuzz>=3.6",
+  "requests>=2.31",
+  "python-dotenv>=1.0",
+  "sqlglot>=25.0",
+  "psycopg[binary]>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-snapshot>=0.9",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["semantic_layer*"]
+
+[tool.setuptools.package-data]
+semantic_layer = [
+  "vocabulary/fixtures/*.json",
+  "intent/vocabulary/*.yaml",
+  "intent/parser/*.yaml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

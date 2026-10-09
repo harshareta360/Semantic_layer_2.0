@@ -1,0 +1,20 @@
+# Intent operator vocabulary (not domain KB)
+aggregations:
+  SUM: [total, sum]
+  AVG: [average, avg, mean]
+  COUNT: [count, how many, number of]
+  MIN: [minimum, min]
+  MAX: [maximum, max]
+
+ranking:
+  TOP: [top, highest]
+  BOTTOM: [bottom, lowest]
+
+comparisons:
+  GT: [greater than, more than, higher than, over]
+  LT: [less than, lower than, under]
+  EQ: [equal to, equals]
+
+temporal:
+  THIS_YEAR: [this year, this yr]
+  LAST_YEAR: [last year, last yr]

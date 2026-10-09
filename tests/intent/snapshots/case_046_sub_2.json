@@ -1,0 +1,57 @@
+{
+  "distinct": false,
+  "from": [],
+  "group_by": [],
+  "having": null,
+  "limit": null,
+  "offset": null,
+  "operations": [],
+  "order_by": [],
+  "select": [
+    {
+      "concept": "Grade",
+      "type": "DIMENSION_REF"
+    }
+  ],
+  "set_operation": null,
+  "type": "QUERY",
+  "where": {
+    "left": {
+      "concept": "Revenue",
+      "type": "METRIC_REF"
+    },
+    "operator": ">",
+    "right": {
+      "query": {
+        "distinct": false,
+        "from": [
+          {
+            "concept": "Grade",
+            "type": "ENTITY_REF"
+          }
+        ],
+        "group_by": [],
+        "having": null,
+        "limit": null,
+        "offset": null,
+        "operations": [],
+        "order_by": [],
+        "select": [
+          {
+            "argument": {
+              "concept": "Revenue",
+              "type": "METRIC_REF"
+            },
+            "function": "AVG",
+            "type": "AGGREGATE"
+          }
+        ],
+        "set_operation": null,
+        "type": "QUERY",
+        "where": null
+      },
+      "type": "SUBQUERY"
+    },
+    "type": "BINARY_PREDICATE"
+  }
+}

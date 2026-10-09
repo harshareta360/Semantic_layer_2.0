@@ -1,0 +1,42 @@
+{
+  "distinct": false,
+  "from": [],
+  "group_by": [
+    {
+      "concept": "Grade",
+      "type": "DIMENSION_REF"
+    }
+  ],
+  "having": null,
+  "limit": 50,
+  "offset": null,
+  "operations": [
+    {
+      "dimension": {
+        "concept": "Grade",
+        "type": "DIMENSION_REF"
+      },
+      "direction": "DESC",
+      "limit": 50,
+      "metric": {
+        "concept": "Revenue",
+        "type": "METRIC_REF"
+      },
+      "type": "RANK"
+    }
+  ],
+  "order_by": [],
+  "select": [
+    {
+      "concept": "Grade",
+      "type": "DIMENSION_REF"
+    },
+    {
+      "concept": "Revenue",
+      "type": "METRIC_REF"
+    }
+  ],
+  "set_operation": null,
+  "type": "QUERY",
+  "where": null
+}

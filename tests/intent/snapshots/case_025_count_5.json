@@ -1,0 +1,23 @@
+{
+  "distinct": false,
+  "from": [],
+  "group_by": [],
+  "having": null,
+  "limit": null,
+  "offset": null,
+  "operations": [],
+  "order_by": [],
+  "select": [
+    {
+      "argument": {
+        "concept": "Grade",
+        "type": "ENTITY_REF"
+      },
+      "function": "COUNT",
+      "type": "AGGREGATE"
+    }
+  ],
+  "set_operation": null,
+  "type": "QUERY",
+  "where": null
+}

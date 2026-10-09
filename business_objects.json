@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "business_objects": {
+    "Finance": {
+      "description": "Academic finance — bags, payments, enrollment masters",
+      "tables": {
+        "public_learner_enrollment": [
+          "id",
+          "learner_id",
+          "enrollment_date",
+          "curriculum_id",
+          "grade_id",
+          "session_id",
+          "is_rollover"
+        ],
+        "public_grades_master": ["id", "name", "code", "sort_order", "is_active"],
+        "public_curriculum_master": ["id", "name", "code", "is_active"],
+        "public_session_master": [
+          "id",
+          "code",
+          "name",
+          "is_active",
+          "start_time",
+          "end_time"
+        ],
+        "public_academic_bag": [
+          "id",
+          "learner_id",
+          "enrollment_id",
+          "bag_status",
+          "payment_status",
+          "gross_price",
+          "bag_type",
+          "gst_per",
+          "gst_total",
+          "net_price",
+          "overall_discount_total",
+          "taxable_price",
+          "total_commitment_amount",
+          "is_active",
+          "created_at",
+          "created_by"
+        ],
+        "public_academic_bag_items": [
+          "id",
+          "academic_bag_id",
+          "product_name",
+          "quantity",
+          "selected_qty",
+          "gross_price",
+          "discount_name",
+          "discount_value",
+          "discount_type",
+          "taxable_price",
+          "gst_per",
+          "gst_amount",
+          "net_price",
+          "is_mandatory",
+          "is_active"
+        ],
+        "public_academic_bag_installment": [
+          "id",
+          "academic_bag_id",
+          "installment_type",
+          "is_draft",
+          "payment_via",
+          "updated_at"
+        ],
+        "public_payment_details": [
+          "id",
+          "academic_bag_id",
+          "learner_enroll_id",
+          "amount",
+          "payment_mode",
+          "payment_status",
+          "payment_type",
+          "pay_date",
+          "installment_type",
+          "created_at"
+        ],
+        "public_learners": ["id", "first_name", "last_name"]
+      }
+    },
+    "Logistics": {
+      "description": "Logistics orders, shipments, enrollment masters",
+      "tables": {
+        "public_learner_enrollment": [
+          "id",
+          "learner_id",
+          "enrollment_date",
+          "curriculum_id",
+          "grade_id",
+          "is_current"
+        ],
+        "public_grades_master": ["id", "name", "code", "sort_order", "is_active"],
+        "public_curriculum_master": ["id", "name", "code", "is_active"],
+        "public_logistics_orders": [
+          "id",
+          "enrollment_id",
+          "academic_bag_id",
+          "logistics_status",
+          "address_verification_status",
+          "city",
+          "state_id",
+          "country_id",
+          "zip_code",
+          "shipment_fee_amount",
+          "shipment_fee_currency",
+          "shipment_fee_status",
+          "total_amount",
+          "total_amount_currency",
+          "reinitiation_fee_waived",
+          "logistics_line_type",
+          "is_active",
+          "created_at"
+        ],
+        "public_logistics_order_items": [
+          "id",
+          "logistics_order_id",
+          "logistics_shipment_id",
+          "product_name",
+          "quantity",
+          "product_price",
+          "gst_per",
+          "gst_amount",
+          "net_price",
+          "item_status",
+          "is_additional_item",
+          "is_active",
+          "academic_bag_id"
+        ],
+        "public_logistics_shipments": [
+          "id",
+          "logistics_order_id",
+          "shipment_number",
+          "tracking_id",
+          "shipment_status",
+          "shipped_at",
+          "delivered_at",
+          "delivery_failure_reason",
+          "is_active",
+          "created_at"
+        ],
+        "public_learners": ["id", "first_name", "last_name"],
+        "public_master_list_value": ["id", "name"]
+      }
+    }
+  }
+}

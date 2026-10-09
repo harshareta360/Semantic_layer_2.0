@@ -1,0 +1,26 @@
+{
+  "distinct": false,
+  "from": [],
+  "group_by": [],
+  "having": null,
+  "limit": null,
+  "offset": null,
+  "operations": [],
+  "order_by": [],
+  "select": [],
+  "set_operation": null,
+  "type": "QUERY",
+  "where": {
+    "left": {
+      "concept": "Revenue",
+      "type": "METRIC_REF"
+    },
+    "operator": "<",
+    "right": {
+      "data_type": "NUMBER",
+      "type": "LITERAL",
+      "value": 1000.0
+    },
+    "type": "BINARY_PREDICATE"
+  }
+}

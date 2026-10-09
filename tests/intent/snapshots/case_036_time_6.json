@@ -1,0 +1,28 @@
+{
+  "distinct": false,
+  "from": [],
+  "group_by": [],
+  "having": null,
+  "limit": null,
+  "offset": null,
+  "operations": [],
+  "order_by": [],
+  "select": [
+    {
+      "argument": {
+        "concept": "Enrollment",
+        "type": "METRIC_REF"
+      },
+      "function": "SUM",
+      "type": "AGGREGATE"
+    }
+  ],
+  "set_operation": null,
+  "type": "QUERY",
+  "where": {
+    "end": null,
+    "range": "THIS_YEAR",
+    "start": null,
+    "type": "TIME_FILTER"
+  }
+}

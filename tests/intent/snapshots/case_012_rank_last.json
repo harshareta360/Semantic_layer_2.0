@@ -1,0 +1,47 @@
+{
+  "distinct": false,
+  "from": [],
+  "group_by": [
+    {
+      "concept": "Curriculum",
+      "type": "DIMENSION_REF"
+    }
+  ],
+  "having": null,
+  "limit": 5,
+  "offset": null,
+  "operations": [
+    {
+      "dimension": {
+        "concept": "Curriculum",
+        "type": "DIMENSION_REF"
+      },
+      "direction": "DESC",
+      "limit": 5,
+      "metric": {
+        "concept": "Enrollment",
+        "type": "METRIC_REF"
+      },
+      "type": "RANK"
+    }
+  ],
+  "order_by": [],
+  "select": [
+    {
+      "concept": "Curriculum",
+      "type": "DIMENSION_REF"
+    },
+    {
+      "concept": "Enrollment",
+      "type": "METRIC_REF"
+    }
+  ],
+  "set_operation": null,
+  "type": "QUERY",
+  "where": {
+    "end": null,
+    "range": "LAST_YEAR",
+    "start": null,
+    "type": "TIME_FILTER"
+  }
+}
